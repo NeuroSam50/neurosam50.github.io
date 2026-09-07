@@ -94,7 +94,7 @@ export default function MusicApp() {
 	useEffect(() => {
 		document.title =
 			activeAlbum === "all"
-				? "НейроСэм - музыка, альбомы и обсуждения"
+				? "НейроСэм"
 				: `${currentViewTitle} - НейроСэм`;
 	}, [activeAlbum, currentViewTitle]);
 
