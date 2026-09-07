@@ -1,0 +1,171 @@
+---
+import { ClientRouter } from "astro:transitions";
+import GlobalPlayer from "../components/GlobalPlayer";
+import AppSidebarIsland from "../components/shared/AppSidebarIsland";
+import UiFeedback from "../components/shared/UiFeedback";
+import "../styles/global.scss";
+
+type Props = {
+	title: string;
+	description?: string;
+	robots?: string;
+	image?: string;
+};
+
+const { title, description, robots, image } = Astro.props;
+
+const canonical = Astro.site
+	? new URL(Astro.url.pathname, Astro.site).href
+	: undefined;
+const ogImage =
+	image && Astro.site ? new URL(image, Astro.site).href : undefined;
+---
+
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		{description && <meta name="description" content={description} />}
+		{robots && <meta name="robots" content={robots} />}
+		{canonical && <link rel="canonical" href={canonical} />}
+
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta
+			name="theme-color"
+			content="#f6f7f9"
+			media="(prefers-color-scheme: light)"
+		/>
+		<meta
+			name="theme-color"
+			content="#0a0a0a"
+			media="(prefers-color-scheme: dark)"
+		/>
+
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="НейроСэм" />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:title" content={title} />
+		{
+			description && (
+				<meta property="og:description" content={description} />
+			)
+		}
+		{canonical && <meta property="og:url" content={canonical} />}
+		{ogImage && <meta property="og:image" content={ogImage} />}
+		<meta
+			name="twitter:card"
+			content={ogImage ? "summary_large_image" : "summary"}
+		/>
+		<meta name="twitter:title" content={title} />
+		{
+			description && (
+				<meta name="twitter:description" content={description} />
+			)
+		}
+		{ogImage && <meta name="twitter:image" content={ogImage} />}
+
+		<meta name="emotion-insertion-point" content="" transition:persist />
+		<title>{title}</title>
+		<ClientRouter />
+		<script is:inline>
+			(function () {
+				try {
+					var stored = localStorage.getItem("neurosam-theme-mode");
+					var dark =
+						stored === "dark" ||
+						(stored !== "light" &&
+							window.matchMedia("(prefers-color-scheme: dark)")
+								.matches);
+					document.documentElement.setAttribute(
+						"data-theme",
+						dark ? "dark" : "light",
+					);
+				} catch (e) {}
+
+				if (!window.__neurosamThemeSwapBound) {
+					window.__neurosamThemeSwapBound = true;
+					document.addEventListener(
+						"astro:before-swap",
+						function (event) {
+							var theme =
+								document.documentElement.getAttribute(
+									"data-theme",
+								);
+							if (theme) {
+								event.newDocument.documentElement.setAttribute(
+									"data-theme",
+									theme,
+								);
+							}
+						},
+					);
+				}
+			})();
+		</script>
+	</head>
+	<body>
+		<div class="app-shell">
+			<div class="app-shell__sidebar">
+				<AppSidebarIsland
+					client:only="react"
+					transition:persist="app-sidebar"
+				/>
+			</div>
+			<div class="app-shell__content">
+				<slot />
+			</div>
+		</div>
+		<GlobalPlayer client:only="react" transition:persist="global-player" />
+		<UiFeedback client:only="react" transition:persist="ui-feedback" />
+	</body>
+</html>
+
+<style>
+	.app-shell {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.app-shell__sidebar {
+		width: 100%;
+		flex-shrink: 0;
+		position: sticky;
+		top: 0;
+		z-index: 10;
+	}
+
+	.app-shell__content {
+		flex: 1;
+		min-width: 0;
+		padding-bottom: var(--player-offset-xs);
+	}
+
+	@media (min-width: 600px) {
+		.app-shell__content {
+			padding-bottom: var(--player-offset-sm);
+		}
+	}
+
+	@media (min-width: 900px) {
+		.app-shell {
+			flex-direction: row;
+		}
+
+		.app-shell__sidebar {
+			width: var(--sidebar-width);
+			height: 100vh;
+			position: sticky;
+			top: 0;
+			overflow: hidden;
+			border-right: 1px solid var(--divider-color);
+		}
+	}
+
+	:global(::view-transition-old(*)),
+	:global(::view-transition-new(*)) {
+		animation: none !important;
+		mix-blend-mode: normal;
+	}
+</style>

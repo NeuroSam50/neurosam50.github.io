@@ -1,0 +1,341 @@
+import { useState } from "react";
+import {
+	Box,
+	Button,
+	Divider,
+	IconButton,
+	List,
+	ListItemButton,
+	ListItemText,
+	Menu,
+	MenuItem,
+	Skeleton,
+	Stack,
+	Toolbar,
+	Typography,
+} from "@mui/material";
+import {
+	FiCamera,
+	FiEdit2,
+	FiInfo,
+	FiLogOut,
+	FiMail,
+	FiMoon,
+	FiFolderPlus,
+	FiMonitor,
+	FiMoreVertical,
+	FiMusic,
+	FiSun,
+	FiTrash2,
+	FiX,
+} from "react-icons/fi";
+import type { ThemePreference } from "../../lib/theme";
+import AccountCard from "./AccountCard";
+
+export type AlbumItem = {
+	id: string;
+	title: string;
+	description: string;
+	href?: string;
+};
+
+type Props = {
+	albumItems: AlbumItem[];
+	activeAlbum?: string;
+	onSelectAlbum?: (albumId: string) => void;
+	isAdmin: boolean;
+	onDeleteAlbum?: (albumId: string) => void;
+	onEditAlbum?: (albumId: string) => void;
+	onCreateAlbum?: () => void;
+	isSignedIn: boolean;
+	authLoading?: boolean;
+	avatarUrl: string;
+	avatarError?: string;
+	nickname: string;
+	authEmail?: string;
+	onOpenAvatarModal: () => void;
+	onOpenNicknameEditor: () => void;
+	onOpenLogin?: () => void;
+	loginHref?: string;
+	onLogout: () => void;
+	themePreference: ThemePreference;
+	onCycleTheme: () => void;
+	onOpenAlbumsNote?: () => void;
+	onClose?: () => void;
+};
+
+const themeLabels: Record<ThemePreference, string> = {
+	system: "Системная",
+	light: "Светлая",
+	dark: "Тёмная",
+};
+
+const themeIcons: Record<ThemePreference, React.ReactNode> = {
+	system: <FiMonitor size={20} />,
+	light: <FiSun size={20} />,
+	dark: <FiMoon size={20} />,
+};
+
+export default function AppSidebar({
+	albumItems,
+	activeAlbum,
+	onSelectAlbum,
+	isAdmin,
+	onDeleteAlbum,
+	onEditAlbum,
+	onCreateAlbum,
+	isSignedIn,
+	authLoading = false,
+	avatarUrl,
+	avatarError,
+	nickname,
+	authEmail,
+	onOpenAvatarModal,
+	onOpenNicknameEditor,
+	onOpenLogin,
+	loginHref,
+	onLogout,
+	themePreference,
+	onCycleTheme,
+	onOpenAlbumsNote,
+	onClose,
+}: Props) {
+	const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+	const [menuAlbumId, setMenuAlbumId] = useState<string | null>(null);
+
+	function closeMenu() {
+		setMenuAnchor(null);
+		setMenuAlbumId(null);
+	}
+
+	return (
+		<Box
+			sx={{
+				height: "100%",
+				bgcolor: "background.paper",
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<Toolbar sx={{ gap: 1.5, px: 2.5 }}>
+				<FiMusic size={20} />
+				<Box sx={{ flex: 1 }}>
+					<Typography
+						variant="subtitle1"
+						sx={{ fontWeight: 800, lineHeight: 1.1 }}
+					>
+						НейроСэм
+					</Typography>
+				</Box>
+				{onClose && (
+					<IconButton aria-label="Закрыть меню" onClick={onClose}>
+						<FiX size={20} />
+					</IconButton>
+				)}
+			</Toolbar>
+			<Divider />
+			<Box sx={{ p: 2, flex: 1, overflowY: "auto" }}>
+				<Stack spacing={1}>
+					{onOpenAlbumsNote && (
+						<Button
+							variant="outlined"
+							startIcon={<FiInfo />}
+							fullWidth
+							onClick={onOpenAlbumsNote}
+						>
+							Коротко
+						</Button>
+					)}
+					<Typography
+						variant="h6"
+						align="center"
+						sx={{ fontWeight: 800, textDecoration: "underline" }}
+					>
+						Подборки
+					</Typography>
+				</Stack>
+				<List disablePadding sx={{ mt: 1 }}>
+					{albumItems.map((album, index) => (
+						<Box key={album.id}>
+							{index > 0 && <Divider sx={{ my: 0.5 }} />}
+							<Stack
+								direction="row"
+								sx={{ alignItems: "flex-start" }}
+							>
+								<ListItemButton
+									{...(album.href
+										? { component: "a", href: album.href }
+										: {
+												onClick: () =>
+													onSelectAlbum?.(album.id),
+											})}
+									selected={activeAlbum === album.id}
+									sx={{
+										borderRadius: 1,
+										alignItems: "flex-start",
+										flex: 1,
+										minWidth: 0,
+									}}
+								>
+									<ListItemText
+										primary={album.title}
+										secondary={album.description}
+										slotProps={{
+											primary: {
+												sx: { fontWeight: 700 },
+											},
+										}}
+									/>
+								</ListItemButton>
+								{isAdmin && album.id !== "all" && (
+									<IconButton
+										size="small"
+										aria-label={`Меню подборки «${album.title}»`}
+										onClick={(event) => {
+											setMenuAnchor(event.currentTarget);
+											setMenuAlbumId(album.id);
+										}}
+										sx={{ mt: 1, flexShrink: 0 }}
+									>
+										<FiMoreVertical size={20} />
+									</IconButton>
+								)}
+							</Stack>
+						</Box>
+					))}
+				</List>
+				{isAdmin && onCreateAlbum && (
+					<Button
+						variant="outlined"
+						startIcon={<FiFolderPlus />}
+						fullWidth
+						onClick={onCreateAlbum}
+						sx={{ mt: 1.5 }}
+					>
+						Новый альбом
+					</Button>
+				)}
+			</Box>
+			<Menu
+				anchorEl={menuAnchor}
+				open={Boolean(menuAnchor)}
+				onClose={closeMenu}
+			>
+				<MenuItem
+					onClick={() => {
+						const albumId = menuAlbumId;
+						closeMenu();
+						if (albumId) {
+							onEditAlbum?.(albumId);
+						}
+					}}
+				>
+					<Box
+						sx={{ display: "flex", alignItems: "center", mr: 1.25 }}
+					>
+						<FiEdit2 size={20} />
+					</Box>
+					Изменить
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						const albumId = menuAlbumId;
+						closeMenu();
+						if (albumId) {
+							onDeleteAlbum?.(albumId);
+						}
+					}}
+				>
+					<Box
+						sx={{ display: "flex", alignItems: "center", mr: 1.25 }}
+					>
+						<FiTrash2 size={20} />
+					</Box>
+					Удалить
+				</MenuItem>
+			</Menu>
+			<Divider />
+			<Box sx={{ p: 2 }}>
+				{authLoading ? (
+					<Stack
+						direction="row"
+						spacing={1.25}
+						sx={{ alignItems: "center" }}
+					>
+						<Skeleton variant="circular" width={40} height={40} />
+						<Skeleton variant="text" width={120} height={20} />
+					</Stack>
+				) : isSignedIn ? (
+					<AccountCard
+						avatarUrl={avatarUrl}
+						nickname={nickname || authEmail || "Гость"}
+						fallbackText={nickname || authEmail || "?"}
+						roleLabel={isAdmin ? "Администратор" : undefined}
+						error={avatarError}
+						onAvatarClick={onOpenAvatarModal}
+						onNameClick={onOpenNicknameEditor}
+						menuItems={[
+							{
+								key: "avatar",
+								icon: <FiCamera size={20} />,
+								label: "Сменить аватар",
+								onClick: onOpenAvatarModal,
+							},
+							{
+								key: "nickname",
+								icon: <FiEdit2 size={20} />,
+								label: "Сменить никнейм",
+								onClick: onOpenNicknameEditor,
+							},
+							{
+								key: "theme",
+								icon: themeIcons[themePreference],
+								label: `Тема: ${themeLabels[themePreference]}`,
+								onClick: onCycleTheme,
+								dividerBefore: true,
+							},
+							{
+								key: "logout",
+								icon: <FiLogOut size={20} />,
+								label: "Выйти",
+								onClick: onLogout,
+								dividerBefore: true,
+							},
+						]}
+					/>
+				) : (
+					<Stack
+						direction="row"
+						sx={{
+							alignItems: "center",
+							justifyContent: "space-between",
+						}}
+					>
+						<Button
+							variant="text"
+							size="small"
+							href={onOpenLogin ? undefined : loginHref}
+							onClick={onOpenLogin}
+							startIcon={<FiMail size={20} />}
+							sx={{
+								color: "text.secondary",
+								px: 0.5,
+								fontWeight: 500,
+							}}
+						>
+							Войти по почте
+						</Button>
+						<IconButton
+							size="small"
+							onClick={onCycleTheme}
+							aria-label={`Тема: ${themeLabels[themePreference]}. Переключить`}
+							sx={{ color: "text.secondary" }}
+						>
+							{themeIcons[themePreference]}
+						</IconButton>
+					</Stack>
+				)}
+			</Box>
+		</Box>
+	);
+}

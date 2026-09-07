@@ -1,0 +1,38 @@
+@use "variables" as vars;
+
+:root {
+	font-family: vars.$font-stack;
+	--fg: #{vars.$color-fg-light};
+	--bg: #{vars.$color-bg-light};
+	--divider-color: #{vars.$color-divider-light};
+	--sidebar-width: #{vars.$sidebar-width};
+	--player-offset-xs: #{vars.$player-offset-xs};
+	--player-offset-sm: #{vars.$player-offset-sm};
+	color: var(--fg);
+	background: var(--bg);
+}
+
+:root[data-theme="dark"] {
+	--fg: #{vars.$color-fg-dark};
+	--bg: #{vars.$color-bg-dark};
+	--divider-color: #{vars.$color-divider-dark};
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-width: 320px;
+	min-height: 100%;
+	background: var(--bg);
+	color: var(--fg);
+}
+
+button,
+input,
+textarea {
+	font: inherit;
+}

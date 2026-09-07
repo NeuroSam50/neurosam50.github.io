@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+import MusicApp from "../components/MusicApp";
+---
+
+<Layout
+	title="НейроСэм - музыка, альбомы и обсуждения"
+	description="Личный минималистичный музыкальный сайт NeuroSam с прослушиванием, скачиванием, альбомами и лайками."
+>
+	<MusicApp client:only="react" />
+</Layout>
+
+<style>
+	.site-intro {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 2rem 1.5rem 0;
+	}
+
+	.site-intro h1 {
+		margin: 0;
+		font-size: 2.25rem;
+		line-height: 1.1;
+		font-weight: 700;
+	}
+
+	.site-intro p {
+		margin: 0.5rem 0 0;
+		max-width: 60ch;
+		opacity: 0.7;
+	}
+</style>

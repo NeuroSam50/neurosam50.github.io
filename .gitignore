@@ -1,0 +1,8 @@
+.astro
+/dist/
+/node_modules/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+claude.md

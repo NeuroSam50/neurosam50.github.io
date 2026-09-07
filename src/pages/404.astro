@@ -1,0 +1,43 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+	title="Страница не найдена - НейроСэм"
+	description="Такой страницы на сайте НейроСэм нет."
+	robots="noindex"
+>
+	<main class="not-found">
+		<h1>404</h1>
+		<p>
+			Такой страницы нет. Возможно, трек был удалён или ссылка устарела.
+		</p>
+		<a href="/">Вернуться к каталогу</a>
+	</main>
+</Layout>
+
+<style>
+	.not-found {
+		max-width: 480px;
+		margin: 0 auto;
+		padding: 4rem 1.5rem;
+		text-align: center;
+	}
+
+	.not-found h1 {
+		margin: 0 0 0.5rem;
+		font-size: 3.5rem;
+		font-weight: 700;
+		line-height: 1.1;
+	}
+
+	.not-found p {
+		margin: 0 0 1.5rem;
+		opacity: 0.7;
+	}
+
+	.not-found a {
+		color: inherit;
+		font-weight: 700;
+	}
+</style>
