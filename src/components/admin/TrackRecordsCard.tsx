@@ -65,6 +65,7 @@ export default function TrackRecordsCard({
 										width: 44,
 										height: 44,
 										flexShrink: 0,
+										borderRadius: 0.5,
 									}}
 								>
 									<FiMusic size={20} />

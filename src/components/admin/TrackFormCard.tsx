@@ -92,7 +92,7 @@ export default function TrackFormCard({
 					display: "block",
 					width: 88,
 					height: 88,
-					borderRadius: 1.5,
+					borderRadius: 0.5,
 					overflow: "hidden",
 					cursor: "pointer",
 					border: "1px solid",
@@ -211,7 +211,7 @@ export default function TrackFormCard({
 					</Stack>
 					{albumRecords.length === 0 && (
 						<Alert severity="info">
-							Сначала создайте альбом выше.
+							Сначала создайте альбом.
 						</Alert>
 					)}
 

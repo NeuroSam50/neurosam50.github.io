@@ -168,7 +168,7 @@ export default function GlobalPlayer() {
 								width: 40,
 								height: 40,
 								flexShrink: 0,
-								borderRadius: 0,
+								borderRadius: 0.5,
 								padding: 0,
 								overflow: "hidden",
 								"&:hover .cover-play-overlay": { opacity: 1 },
