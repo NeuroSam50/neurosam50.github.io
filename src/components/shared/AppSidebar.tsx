@@ -72,7 +72,16 @@ export default function AppSidebar({
 		>
 			<Toolbar sx={{ gap: 1.5, px: 2.5 }}>
 				<FiMusic size={20} />
-				<Box sx={{ flex: 1 }}>
+				<Box
+					component="a"
+					href="/"
+					sx={{
+						flex: 1,
+						color: "inherit",
+						textDecoration: "none",
+						cursor: "pointer",
+					}}
+				>
 					<Typography
 						variant="subtitle1"
 						sx={{ fontWeight: 800, lineHeight: 1.1 }}
