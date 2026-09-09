@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
 import {
 	Box,
@@ -12,6 +11,8 @@ import {
 } from "@mui/material";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
+import { setPageTitle } from "../lib/pageTitleStore";
+import { setPageBack } from "../lib/pageBackStore";
 import { useAuthState, setMyCommentVotes, setMyVotes } from "../lib/authStore";
 import {
 	useCatalogState,
@@ -33,9 +34,10 @@ import {
 
 type Props = {
 	trackId: string;
+	onBack: () => void;
 };
 
-export default function TrackPage({ trackId }: Props) {
+export default function TrackPage({ trackId, onBack }: Props) {
 	const { effectiveMode } = useColorMode();
 	const theme = useMemo(() => createAppTheme(effectiveMode), [effectiveMode]);
 	const emotionCache = useMemo(() => createEmotionCache(), []);
@@ -79,13 +81,26 @@ export default function TrackPage({ trackId }: Props) {
 		return () => watchTrack("");
 	}, [trackId]);
 
+	useEffect(() => {
+		setPageBack(() => onBack());
+		return () => setPageBack(null);
+	}, [onBack]);
+
+	useEffect(() => {
+		if (!track) {
+			return;
+		}
+		setPageTitle(track.title);
+		return () => setPageTitle("");
+	}, [track]);
+
 	async function handleDeleteTrack() {
 		if (!track) {
 			return;
 		}
 		const deleted = await deleteTrack(track.id);
 		if (deleted) {
-			navigate("/");
+			onBack();
 		}
 	}
 

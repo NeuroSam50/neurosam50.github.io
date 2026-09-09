@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
 import {
 	Alert,
@@ -31,11 +30,19 @@ import { useTrackVotes } from "../hooks/music/useTrackVotes";
 import { useActiveAlbum } from "../lib/albumStore";
 import { pluralize } from "../lib/plural";
 import TrackCard from "./music/TrackCard";
+import TrackPage from "./TrackPage";
 import {
 	playTrack as playStoreTrack,
 	usePlayerState,
 } from "../lib/playerStore";
 import type { Track } from "../types/music";
+
+function getTrackIdFromUrl() {
+	if (typeof window === "undefined") {
+		return "";
+	}
+	return new URLSearchParams(window.location.search).get("t") || "";
+}
 
 function toPlayerTrack(track: Track) {
 	return {
@@ -61,6 +68,27 @@ export default function MusicApp() {
 
 	const activeAlbum = useActiveAlbum();
 	const [query, setQuery] = useState("");
+	const [openTrackId, setOpenTrackId] = useState(getTrackIdFromUrl);
+
+	useEffect(() => {
+		const onPopState = () => setOpenTrackId(getTrackIdFromUrl());
+		window.addEventListener("popstate", onPopState);
+		return () => window.removeEventListener("popstate", onPopState);
+	}, []);
+
+	function openTrack(id: string) {
+		const url = new URL(window.location.href);
+		url.searchParams.set("t", id);
+		window.history.pushState({}, "", url);
+		setOpenTrackId(id);
+	}
+
+	function closeTrack() {
+		const url = new URL(window.location.href);
+		url.searchParams.delete("t");
+		window.history.pushState({}, "", url);
+		setOpenTrackId("");
+	}
 	const { track: currentPlayerTrack, isPlaying: isPlayerPlaying } =
 		usePlayerState();
 	const currentTrackId = currentPlayerTrack?.id ?? "";
@@ -91,13 +119,16 @@ export default function MusicApp() {
 				"Треки";
 
 	useEffect(() => {
+		if (openTrackId) {
+			return;
+		}
 		document.title =
 			activeAlbum === "all"
 				? "НейроСэм"
 				: `${currentViewTitle} - НейроСэм`;
 		setPageTitle(currentViewTitle);
 		return () => setPageTitle("");
-	}, [activeAlbum, currentViewTitle]);
+	}, [activeAlbum, currentViewTitle, openTrackId]);
 
 	function renderCatalog() {
 		if (loading) {
@@ -150,9 +181,13 @@ export default function MusicApp() {
 				onToggleLike={() => toggleTrackLike(track.id)}
 				onDelete={() => deleteTrack(track.id)}
 				onSaveLyrics={(lyrics) => updateTrackLyrics(track.id, lyrics)}
-				onOpenComments={() => navigate(`/track/${track.id}`)}
+				onOpenComments={() => openTrack(track.id)}
 			/>
 		));
+	}
+
+	if (openTrackId) {
+		return <TrackPage trackId={openTrackId} onBack={closeTrack} />;
 	}
 
 	return (

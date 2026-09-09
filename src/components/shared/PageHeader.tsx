@@ -46,6 +46,7 @@ import {
 } from "../../lib/authDialogStore";
 import { useProfileEditing } from "../../hooks/music/useProfileEditing";
 import { usePageTitle } from "../../lib/pageTitleStore";
+import { usePageBack } from "../../lib/pageBackStore";
 import { openMobileNav } from "../../lib/mobileNavStore";
 import AccountCard from "./AccountCard";
 import LoginDialog from "../music/LoginDialog";
@@ -101,6 +102,8 @@ export default function PageHeader({ title, backHref }: Props) {
 	}
 
 	const headerTitle = usePageTitle(title);
+	const pageBack = usePageBack();
+	const showBack = Boolean(backHref) || Boolean(pageBack);
 
 	return (
 		<CacheProvider value={emotionCache}>
@@ -113,7 +116,7 @@ export default function PageHeader({ title, backHref }: Props) {
 					sx={{ borderBottom: 1, borderColor: "divider" }}
 				>
 					<Toolbar sx={{ gap: 1.5 }}>
-						{!backHref && (
+						{!showBack && (
 							<IconButton
 								aria-label="Открыть меню"
 								edge="start"
@@ -125,10 +128,11 @@ export default function PageHeader({ title, backHref }: Props) {
 								<FiMenu size={22} />
 							</IconButton>
 						)}
-						{backHref && (
+						{showBack && (
 							<IconButton
 								aria-label="Назад"
-								href={backHref}
+								href={pageBack ? undefined : backHref}
+								onClick={pageBack ?? undefined}
 								edge="start"
 							>
 								<FiArrowLeft size={20} />
