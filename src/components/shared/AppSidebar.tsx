@@ -126,7 +126,11 @@ export default function AppSidebar({
 							>
 								<ListItemButton
 									{...(album.href
-										? { component: "a", href: album.href }
+										? {
+												component: "a",
+												href: album.href,
+												onClick: onClose,
+											}
 										: {
 												onClick: () =>
 													onSelectAlbum?.(album.id),

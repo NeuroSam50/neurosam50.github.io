@@ -85,7 +85,9 @@ export default function AppSidebarIsland() {
 			} else {
 				url.searchParams.set("album", albumId);
 			}
+			url.searchParams.delete("t");
 			window.history.replaceState({}, "", url);
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		} else {
 			navigate(albumId === "all" ? "/" : `/?album=${albumId}`);
 		}
