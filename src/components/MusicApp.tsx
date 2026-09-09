@@ -13,7 +13,7 @@ import {
 	ThemeProvider,
 	Typography,
 } from "@mui/material";
-import { FiSearch, FiUploadCloud } from "react-icons/fi";
+import { FiSearch, FiSettings } from "react-icons/fi";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
 import { setPageTitle } from "../lib/pageTitleStore";
@@ -246,9 +246,9 @@ export default function MusicApp() {
 									<Button
 										href="/upload"
 										variant="outlined"
-										startIcon={<FiUploadCloud />}
+										startIcon={<FiSettings />}
 									>
-										Загрузить трек
+										Управление треками
 									</Button>
 								)}
 								<Typography color="text.secondary">
