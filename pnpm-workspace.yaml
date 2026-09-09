@@ -1,3 +1,7 @@
 allowBuilds:
     "@parcel/watcher": false
     esbuild: true
+minimumReleaseAgeExclude:
+    - "@astrojs/markdown-satteri@0.4.1"
+    - astro@7.3.2
+    - prettier-plugin-astro@1.0.0

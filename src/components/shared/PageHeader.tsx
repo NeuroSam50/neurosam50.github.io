@@ -118,7 +118,9 @@ export default function PageHeader({ title, backHref }: Props) {
 								aria-label="Открыть меню"
 								edge="start"
 								onClick={openMobileNav}
-								sx={{ display: { xs: "inline-flex", md: "none" } }}
+								sx={{
+									display: { xs: "inline-flex", md: "none" },
+								}}
 							>
 								<FiMenu size={22} />
 							</IconButton>

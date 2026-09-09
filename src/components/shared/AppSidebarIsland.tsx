@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
-import { CssBaseline, Drawer, ThemeProvider, useMediaQuery } from "@mui/material";
+import {
+	CssBaseline,
+	Drawer,
+	ThemeProvider,
+	useMediaQuery,
+} from "@mui/material";
 import { FiFolderPlus } from "react-icons/fi";
 import { createAppTheme, useColorMode } from "../../lib/theme";
 import { createEmotionCache } from "../../lib/emotionCache";
