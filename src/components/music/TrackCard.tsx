@@ -30,6 +30,22 @@ import { pluralize } from "../../lib/plural";
 import type { Track } from "../../types/music";
 
 const LIKE_COLOR = "#e0245e";
+const AUTHORS_MARKER = "\n\n---AUTHORS---\n";
+
+function splitLyrics(raw: string) {
+	const index = raw.indexOf(AUTHORS_MARKER);
+	if (index === -1) {
+		return { text: raw, authors: "" };
+	}
+	return {
+		text: raw.slice(0, index),
+		authors: raw.slice(index + AUTHORS_MARKER.length),
+	};
+}
+
+function joinLyrics(text: string, authors: string) {
+	return authors.trim() ? `${text}${AUTHORS_MARKER}${authors.trim()}` : text;
+}
 
 type Props = {
 	track: Track;
@@ -59,11 +75,15 @@ export default function TrackCard({
 	const isCurrentlyPlaying = isCurrent && isPlaying;
 	const [isDownloading, setIsDownloading] = useState(false);
 	const [lyricsOpen, setLyricsOpen] = useState(false);
-	const [lyricsDraft, setLyricsDraft] = useState(track.lyrics);
+	const [lyricsDraft, setLyricsDraft] = useState("");
+	const [authorsDraft, setAuthorsDraft] = useState("");
 	const [savingLyrics, setSavingLyrics] = useState(false);
 
 	const hasLyrics = Boolean(track.lyrics);
 	const showLyricsButton = isAdmin || hasLyrics;
+	const { text: lyricsText, authors: lyricsAuthors } = splitLyrics(
+		track.lyrics,
+	);
 
 	const handleDownload = async () => {
 		if (isDownloading) return;
@@ -91,7 +111,8 @@ export default function TrackCard({
 	};
 
 	const openLyrics = () => {
-		setLyricsDraft(track.lyrics);
+		setLyricsDraft(lyricsText);
+		setAuthorsDraft(lyricsAuthors);
 		setLyricsOpen(true);
 	};
 
@@ -99,7 +120,9 @@ export default function TrackCard({
 		if (!onSaveLyrics) return;
 		setSavingLyrics(true);
 		try {
-			const saved = await onSaveLyrics(lyricsDraft.trim());
+			const saved = await onSaveLyrics(
+				joinLyrics(lyricsDraft.trim(), authorsDraft),
+			);
 			if (saved !== false) {
 				setLyricsOpen(false);
 			}
@@ -300,26 +323,46 @@ export default function TrackCard({
 					<DialogTitle>{track.title} - текст песни</DialogTitle>
 					<DialogContent>
 						{isAdmin ? (
-							<TextField
-								value={lyricsDraft}
-								onChange={(event) =>
-									setLyricsDraft(event.target.value)
-								}
-								fullWidth
-								multiline
-								minRows={6}
-								maxRows={20}
-								autoFocus
-								placeholder="Введите текст песни"
-								sx={{ mt: 1 }}
-							/>
+							<Stack spacing={2} sx={{ mt: 1 }}>
+								<TextField
+									value={lyricsDraft}
+									onChange={(event) =>
+										setLyricsDraft(event.target.value)
+									}
+									fullWidth
+									multiline
+									minRows={6}
+									maxRows={20}
+									autoFocus
+									placeholder="Введите текст песни"
+								/>
+								<TextField
+									value={authorsDraft}
+									onChange={(event) =>
+										setAuthorsDraft(event.target.value)
+									}
+									fullWidth
+									placeholder="Авторы текста песни"
+									label="Авторы текста"
+								/>
+							</Stack>
 						) : (
-							<Typography
-								variant="body2"
-								sx={{ whiteSpace: "pre-wrap" }}
-							>
-								{track.lyrics}
-							</Typography>
+							<Stack spacing={2}>
+								<Typography
+									variant="body2"
+									sx={{ whiteSpace: "pre-wrap" }}
+								>
+									{lyricsText}
+								</Typography>
+								{lyricsAuthors && (
+									<Typography
+										variant="body2"
+										color="text.secondary"
+									>
+										{lyricsAuthors}
+									</Typography>
+								)}
+							</Stack>
 						)}
 					</DialogContent>
 					<DialogActions>
