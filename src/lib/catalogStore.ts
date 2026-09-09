@@ -169,7 +169,10 @@ export async function deleteAlbum(albumId: string) {
 		.eq("album_id", albumId);
 
 	if (unlinkError) {
-		notify(describeError(unlinkError, "Не удалось удалить подборку."), "error");
+		notify(
+			describeError(unlinkError, "Не удалось удалить подборку."),
+			"error",
+		);
 		return false;
 	}
 
@@ -318,6 +321,42 @@ export async function reorderTracks(
 	}
 
 	refreshCatalog();
+	return true;
+}
+
+export async function reorderAlbums(
+	updates: { id: string; position: number }[],
+) {
+	if (!supabase) {
+		return false;
+	}
+
+	const client = supabase;
+	const results = await Promise.all(
+		updates.map(({ id, position }) =>
+			client.from("albums").update({ position }).eq("id", id),
+		),
+	);
+
+	const failed = results.find((result) => result.error);
+
+	if (failed) {
+		notify(
+			describeError(
+				failed.error,
+				"Не удалось сохранить порядок подборок.",
+			),
+			"error",
+		);
+		return false;
+	}
+
+	const order = new Map(updates.map(({ id, position }) => [id, position]));
+	patch({
+		albumRecords: [...state.albumRecords].sort(
+			(a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+		),
+	});
 	return true;
 }
 

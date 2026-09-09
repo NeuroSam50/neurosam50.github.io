@@ -192,7 +192,11 @@ export function useComments({
 		}
 	}
 
-	async function editComment(trackId: string, commentId: string, body: string) {
+	async function editComment(
+		trackId: string,
+		commentId: string,
+		body: string,
+	) {
 		if (!supabase) {
 			return;
 		}

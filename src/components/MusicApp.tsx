@@ -28,7 +28,10 @@ import {
 	useSortable,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+	restrictToParentElement,
+	restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";

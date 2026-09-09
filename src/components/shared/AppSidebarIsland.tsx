@@ -16,6 +16,7 @@ import {
 	useCatalogState,
 	createAlbum,
 	deleteAlbum,
+	reorderAlbums,
 	updateAlbum,
 } from "../../lib/catalogStore";
 import {
@@ -146,6 +147,12 @@ export default function AppSidebarIsland() {
 		}
 	}
 
+	function handleReorderAlbums(albumIds: string[]) {
+		reorderAlbums(
+			albumIds.map((id, index) => ({ id, position: index * 10 + 10 })),
+		);
+	}
+
 	const albumItems = buildAlbumItems(albumRecords, trackRecords.length).map(
 		(album) => ({
 			...album,
@@ -166,6 +173,7 @@ export default function AppSidebarIsland() {
 		onEditAlbum: handleEditAlbum,
 		onCreateAlbum: openCreateAlbum,
 		onOpenAlbumsNote: () => setAlbumsNoteOpen(true),
+		onReorderAlbums: handleReorderAlbums,
 	};
 
 	return (

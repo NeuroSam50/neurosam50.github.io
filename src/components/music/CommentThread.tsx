@@ -23,6 +23,7 @@ import {
 } from "react-icons/fi";
 import { TbPin, TbPinFilled } from "react-icons/tb";
 import type { Comment } from "../../types/music";
+import EmojiPicker from "./EmojiPicker";
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
 	dateStyle: "medium",
@@ -173,7 +174,10 @@ export default function CommentThread({
 									<Stack
 										direction="row"
 										spacing={1}
-										sx={{ alignItems: "flex-start", mt: 0.5 }}
+										sx={{
+											alignItems: "flex-start",
+											mt: 0.5,
+										}}
 									>
 										<TextField
 											value={editDraft}
@@ -355,6 +359,10 @@ export default function CommentThread({
 						multiline
 						maxRows={4}
 						disabled={submitting}
+					/>
+					<EmojiPicker
+						disabled={submitting}
+						onSelect={(emoji) => onDraftChange(draft + emoji)}
 					/>
 					<IconButton
 						color="primary"

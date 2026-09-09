@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
 	Box,
 	Button,
@@ -17,11 +17,31 @@ import {
 	FiEdit2,
 	FiFolderPlus,
 	FiInfo,
+	FiMenu,
 	FiMoreVertical,
 	FiMusic,
 	FiTrash2,
 	FiX,
 } from "react-icons/fi";
+import {
+	DndContext,
+	type DragEndEvent,
+	PointerSensor,
+	closestCenter,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import {
+	SortableContext,
+	arrayMove,
+	useSortable,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+	restrictToParentElement,
+	restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
 
 export type AlbumItem = {
 	id: string;
@@ -40,7 +60,61 @@ type Props = {
 	onCreateAlbum?: () => void;
 	onOpenAlbumsNote?: () => void;
 	onClose?: () => void;
+	onReorderAlbums?: (albumIds: string[]) => void;
 };
+
+type SortableAlbumRowProps = {
+	albumId: string;
+	dragEnabled: boolean;
+	children: (dragHandle: ReactNode) => ReactNode;
+};
+
+function SortableAlbumRow({
+	albumId,
+	dragEnabled,
+	children,
+}: SortableAlbumRowProps) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id: albumId, disabled: !dragEnabled });
+
+	const dragHandle = dragEnabled ? (
+		<Box
+			{...attributes}
+			{...listeners}
+			sx={{
+				display: "flex",
+				alignItems: "center",
+				flexShrink: 0,
+				cursor: "grab",
+				touchAction: "none",
+				color: "text.secondary",
+				mt: 1,
+			}}
+			aria-label="Изменить порядок"
+		>
+			<FiMenu size={20} />
+		</Box>
+	) : null;
+
+	return (
+		<Box
+			ref={setNodeRef}
+			style={{
+				transform: CSS.Transform.toString(transform),
+				transition,
+				opacity: isDragging ? 0.5 : 1,
+			}}
+		>
+			{children(dragHandle)}
+		</Box>
+	);
+}
 
 export default function AppSidebar({
 	albumItems,
@@ -52,13 +126,34 @@ export default function AppSidebar({
 	onCreateAlbum,
 	onOpenAlbumsNote,
 	onClose,
+	onReorderAlbums,
 }: Props) {
 	const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 	const [menuAlbumId, setMenuAlbumId] = useState<string | null>(null);
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+	);
+	const dragEnabled = isAdmin && Boolean(onReorderAlbums);
+	const sortableIds = albumItems
+		.filter((album) => album.id !== "all")
+		.map((album) => album.id);
 
 	function closeMenu() {
 		setMenuAnchor(null);
 		setMenuAlbumId(null);
+	}
+
+	function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		if (!over || active.id === over.id) {
+			return;
+		}
+		const oldIndex = sortableIds.indexOf(String(active.id));
+		const newIndex = sortableIds.indexOf(String(over.id));
+		if (oldIndex === -1 || newIndex === -1) {
+			return;
+		}
+		onReorderAlbums?.(arrayMove(sortableIds, oldIndex, newIndex));
 	}
 
 	return (
@@ -116,60 +211,107 @@ export default function AppSidebar({
 						Подборки
 					</Typography>
 				</Stack>
-				<List disablePadding sx={{ mt: 1 }}>
-					{albumItems.map((album, index) => (
-						<Box key={album.id}>
-							{index > 0 && <Divider sx={{ my: 0.5 }} />}
-							<Stack
-								direction="row"
-								sx={{ alignItems: "flex-start" }}
-							>
-								<ListItemButton
-									{...(album.href
-										? {
-												component: "a",
-												href: album.href,
-												onClick: onClose,
-											}
-										: {
-												onClick: () =>
-													onSelectAlbum?.(album.id),
-											})}
-									selected={activeAlbum === album.id}
-									sx={{
-										borderRadius: 1,
-										alignItems: "flex-start",
-										flex: 1,
-										minWidth: 0,
-									}}
-								>
-									<ListItemText
-										primary={album.title}
-										secondary={album.description}
-										slotProps={{
-											primary: {
-												sx: { fontWeight: 700 },
-											},
-										}}
-									/>
-								</ListItemButton>
-								{isAdmin && album.id !== "all" && (
-									<IconButton
-										size="small"
-										aria-label={`Меню подборки «${album.title}»`}
-										onClick={(event) => {
-											setMenuAnchor(event.currentTarget);
-											setMenuAlbumId(album.id);
-										}}
-										sx={{ mt: 1, flexShrink: 0 }}
+				<DndContext
+					sensors={sensors}
+					collisionDetection={closestCenter}
+					modifiers={[
+						restrictToVerticalAxis,
+						restrictToParentElement,
+					]}
+					onDragEnd={handleDragEnd}
+				>
+					<SortableContext
+						items={sortableIds}
+						strategy={verticalListSortingStrategy}
+					>
+						<List disablePadding sx={{ mt: 1 }}>
+							{albumItems.map((album, index) => {
+								const row = (dragHandle: ReactNode) => (
+									<Box key={album.id}>
+										{index > 0 && (
+											<Divider sx={{ my: 0.5 }} />
+										)}
+										<Stack
+											direction="row"
+											sx={{ alignItems: "flex-start" }}
+										>
+											{dragHandle}
+											<ListItemButton
+												{...(album.href
+													? {
+															component: "a",
+															href: album.href,
+															onClick: onClose,
+														}
+													: {
+															onClick: () =>
+																onSelectAlbum?.(
+																	album.id,
+																),
+														})}
+												selected={
+													activeAlbum === album.id
+												}
+												sx={{
+													borderRadius: 1,
+													alignItems: "flex-start",
+													flex: 1,
+													minWidth: 0,
+												}}
+											>
+												<ListItemText
+													primary={album.title}
+													secondary={
+														album.description
+													}
+													slotProps={{
+														primary: {
+															sx: {
+																fontWeight: 700,
+															},
+														},
+													}}
+												/>
+											</ListItemButton>
+											{isAdmin && album.id !== "all" && (
+												<IconButton
+													size="small"
+													aria-label={`Меню подборки «${album.title}»`}
+													onClick={(event) => {
+														setMenuAnchor(
+															event.currentTarget,
+														);
+														setMenuAlbumId(
+															album.id,
+														);
+													}}
+													sx={{
+														mt: 1,
+														flexShrink: 0,
+													}}
+												>
+													<FiMoreVertical size={20} />
+												</IconButton>
+											)}
+										</Stack>
+									</Box>
+								);
+
+								return album.id === "all" ? (
+									row(null)
+								) : (
+									<SortableAlbumRow
+										key={album.id}
+										albumId={album.id}
+										dragEnabled={dragEnabled}
 									>
-										<FiMoreVertical size={20} />
-									</IconButton>
-								)}
-							</Stack>
-						</Box>
-					))}
-				</List>
+										{row}
+									</SortableAlbumRow>
+								);
+							})}
+						</List>
+					</SortableContext>
+				</DndContext>
 				{isAdmin && onCreateAlbum && (
 					<Button
 						variant="outlined"
