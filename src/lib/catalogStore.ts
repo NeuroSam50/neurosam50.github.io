@@ -157,25 +157,34 @@ export async function deleteAlbum(albumId: string) {
 
 	const accepted = await confirmAction({
 		title: "Удалить подборку?",
-		body: "Подборку можно удалить, только если в ней нет треков.",
 	});
 
 	if (!accepted) {
 		return false;
 	}
 
-	const { error } = await supabase.from("albums").delete().eq("id", albumId);
+	const { error: unlinkError } = await supabase
+		.from("tracks")
+		.update({ album_id: null })
+		.eq("album_id", albumId);
 
-	if (error) {
-		notify(
-			error.code === "23503"
-				? "Нельзя удалить подборку, пока в ней есть треки. Сначала удалите треки этой подборки."
-				: describeError(error, "Не удалось удалить подборку."),
-			"error",
-		);
+	if (unlinkError) {
+		notify(describeError(unlinkError, "Не удалось удалить подборку."), "error");
 		return false;
 	}
 
+	const { error } = await supabase.from("albums").delete().eq("id", albumId);
+
+	if (error) {
+		notify(describeError(error, "Не удалось удалить подборку."), "error");
+		return false;
+	}
+
+	setTrackRecords((current) =>
+		current.map((track) =>
+			track.album === albumId ? { ...track, album: "" } : track,
+		),
+	);
 	patch({
 		albumRecords: state.albumRecords.filter(
 			(album) => album.id !== albumId,
