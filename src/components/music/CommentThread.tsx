@@ -9,13 +9,17 @@ import {
 	Typography,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
+import { useState } from "react";
 import {
+	FiCheck,
+	FiEdit2,
 	FiLogIn,
 	FiSend,
 	FiShield,
 	FiThumbsDown,
 	FiThumbsUp,
 	FiTrash2,
+	FiX,
 } from "react-icons/fi";
 import { TbPin, TbPinFilled } from "react-icons/tb";
 import type { Comment } from "../../types/music";
@@ -43,6 +47,7 @@ type Props = {
 	onDraftChange: (value: string) => void;
 	onSubmit: () => void;
 	onVote: (commentId: string, direction: "up" | "down") => void;
+	onEdit: (commentId: string, body: string) => void;
 	onDelete: (commentId: string) => void;
 	onTogglePin: (commentId: string) => void;
 	onRequireAuth: () => void;
@@ -61,10 +66,31 @@ export default function CommentThread({
 	onDraftChange,
 	onSubmit,
 	onVote,
+	onEdit,
 	onDelete,
 	onTogglePin,
 	onRequireAuth,
 }: Props) {
+	const [editingId, setEditingId] = useState("");
+	const [editDraft, setEditDraft] = useState("");
+
+	function startEditing(commentId: string, body: string) {
+		setEditingId(commentId);
+		setEditDraft(body);
+	}
+
+	function cancelEditing() {
+		setEditingId("");
+		setEditDraft("");
+	}
+
+	function confirmEditing(commentId: string) {
+		if (editDraft.trim()) {
+			onEdit(commentId, editDraft.trim());
+		}
+		cancelEditing();
+	}
+
 	return (
 		<Stack spacing={1.5} sx={{ minWidth: 0, height: "100%" }}>
 			{loading ? (
@@ -134,18 +160,76 @@ export default function CommentThread({
 									>
 										{formatCommentDate(comment.createdAt)}
 									</Typography>
+									{comment.editedAt && (
+										<Typography
+											variant="caption"
+											color="text.secondary"
+										>
+											(изменено)
+										</Typography>
+									)}
 								</Stack>
-								<Typography
-									variant="body2"
-									sx={{
-										whiteSpace: "pre-wrap",
-										overflowWrap: "anywhere",
-										wordBreak: "break-word",
-										color: "text.primary",
-									}}
-								>
-									{comment.body}
-								</Typography>
+								{editingId === comment.id ? (
+									<Stack
+										direction="row"
+										spacing={1}
+										sx={{ alignItems: "flex-start", mt: 0.5 }}
+									>
+										<TextField
+											value={editDraft}
+											onChange={(event) =>
+												setEditDraft(event.target.value)
+											}
+											onKeyDown={(event) => {
+												if (
+													event.key === "Enter" &&
+													!event.shiftKey
+												) {
+													event.preventDefault();
+													confirmEditing(comment.id);
+												}
+												if (event.key === "Escape") {
+													cancelEditing();
+												}
+											}}
+											size="small"
+											fullWidth
+											multiline
+											maxRows={4}
+											autoFocus
+										/>
+										<IconButton
+											size="small"
+											aria-label="Сохранить изменения"
+											color="primary"
+											disabled={!editDraft.trim()}
+											onClick={() =>
+												confirmEditing(comment.id)
+											}
+										>
+											<FiCheck size={15} />
+										</IconButton>
+										<IconButton
+											size="small"
+											aria-label="Отменить редактирование"
+											onClick={cancelEditing}
+										>
+											<FiX size={15} />
+										</IconButton>
+									</Stack>
+								) : (
+									<Typography
+										variant="body2"
+										sx={{
+											whiteSpace: "pre-wrap",
+											overflowWrap: "anywhere",
+											wordBreak: "break-word",
+											color: "text.primary",
+										}}
+									>
+										{comment.body}
+									</Typography>
+								)}
 								<Stack
 									direction="row"
 									spacing={0.5}
@@ -218,6 +302,21 @@ export default function CommentThread({
 											</IconButton>
 										</Tooltip>
 									)}
+									{comment.userId === authUserId &&
+										editingId !== comment.id && (
+											<IconButton
+												size="small"
+												aria-label="Редактировать комментарий"
+												onClick={() =>
+													startEditing(
+														comment.id,
+														comment.body,
+													)
+												}
+											>
+												<FiEdit2 size={15} />
+											</IconButton>
+										)}
 									{(isAdmin ||
 										comment.userId === authUserId) && (
 										<IconButton

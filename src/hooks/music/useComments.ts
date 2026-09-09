@@ -62,7 +62,7 @@ export function useComments({
 		const { data, error } = await supabase
 			.from("comment_details")
 			.select(
-				"id,track_id,user_id,body,up_count,down_count,is_pinned,created_at,nickname,avatar_url,is_admin",
+				"id,track_id,user_id,body,up_count,down_count,is_pinned,created_at,edited_at,nickname,avatar_url,is_admin",
 			)
 			.eq("track_id", trackId)
 			.order("created_at", { ascending: true });
@@ -86,6 +86,7 @@ export function useComments({
 						userId: row.user_id,
 						body: row.body,
 						createdAt: row.created_at,
+						editedAt: row.edited_at || "",
 						nickname: row.nickname || "Гость",
 						avatarUrl: row.avatar_url || "",
 						isAdmin: Boolean(row.is_admin),
@@ -189,6 +190,33 @@ export function useComments({
 				[trackId]: false,
 			}));
 		}
+	}
+
+	async function editComment(trackId: string, commentId: string, body: string) {
+		if (!supabase) {
+			return;
+		}
+
+		const trimmed = body.trim();
+
+		if (!trimmed) {
+			return;
+		}
+
+		const { error } = await supabase
+			.from("comments")
+			.update({ body: trimmed })
+			.eq("id", commentId);
+
+		if (error) {
+			notify(
+				describeError(error, "Не удалось изменить комментарий."),
+				"error",
+			);
+			return;
+		}
+
+		await loadComments(trackId);
 	}
 
 	async function deleteComment(trackId: string, commentId: string) {
@@ -445,6 +473,7 @@ export function useComments({
 		loadComments,
 		watchTrack: setSubscribedTrackId,
 		submitComment,
+		editComment,
 		deleteComment,
 		toggleCommentVote,
 		togglePinComment,

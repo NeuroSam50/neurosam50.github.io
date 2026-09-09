@@ -191,6 +191,9 @@ export default function TrackPage({ trackId, onBack }: Props) {
 									direction,
 								)
 							}
+							onEdit={(commentId, body) =>
+								comments.editComment(track.id, commentId, body)
+							}
 							onDelete={(commentId) =>
 								comments.deleteComment(track.id, commentId)
 							}

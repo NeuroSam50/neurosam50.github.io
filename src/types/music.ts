@@ -28,6 +28,7 @@ export type Comment = {
 	userId: string;
 	body: string;
 	createdAt: string;
+	editedAt: string;
 	nickname: string;
 	avatarUrl: string;
 	isAdmin: boolean;
