@@ -210,9 +210,7 @@ export default function TrackFormCard({
 						)}
 					</Stack>
 					{albumRecords.length === 0 && (
-						<Alert severity="info">
-							Сначала создайте альбом.
-						</Alert>
+						<Alert severity="info">Сначала создайте альбом.</Alert>
 					)}
 
 					<Stack

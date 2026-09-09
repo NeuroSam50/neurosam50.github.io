@@ -1,24 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
-import {
-	AppBar,
-	CssBaseline,
-	Drawer,
-	IconButton,
-	ThemeProvider,
-	Toolbar,
-	Typography,
-	useMediaQuery,
-} from "@mui/material";
-import { FiFolderPlus, FiMenu } from "react-icons/fi";
-import {
-	createAppTheme,
-	useColorMode,
-	type ThemePreference,
-} from "../../lib/theme";
+import { CssBaseline, Drawer, ThemeProvider, useMediaQuery } from "@mui/material";
+import { FiFolderPlus } from "react-icons/fi";
+import { createAppTheme, useColorMode } from "../../lib/theme";
 import { createEmotionCache } from "../../lib/emotionCache";
-import { useAuthState, logout } from "../../lib/authStore";
+import { useAuthState } from "../../lib/authStore";
+import { closeMobileNav, useMobileNavOpen } from "../../lib/mobileNavStore";
 import {
 	useCatalogState,
 	createAlbum,
@@ -31,31 +19,17 @@ import {
 	syncActiveAlbumFromUrl,
 	useActiveAlbum,
 } from "../../lib/albumStore";
-import {
-	useAuthDialogState,
-	setLoginOpen,
-	setLogin,
-	setPassword,
-	openLoginDialog,
-	toggleAuthMode,
-	handleAuthSubmit,
-} from "../../lib/authDialogStore";
-import { setAvatarUrl, setNickname } from "../../lib/authStore";
 import { useAlbumsNote } from "../../hooks/music/useAlbumsNote";
-import { useProfileEditing } from "../../hooks/music/useProfileEditing";
 import AppSidebar from "./AppSidebar";
-import LoginDialog from "../music/LoginDialog";
-import NicknameDialog from "../music/NicknameDialog";
 import AlbumFormDialog from "../music/AlbumFormDialog";
 import AlbumsNoteDialog from "../music/AlbumsNoteDialog";
-import AvatarCropDialog from "../AvatarCropDialog";
 
 function readPathname() {
 	return typeof window !== "undefined" ? window.location.pathname : "/";
 }
 
 export default function AppSidebarIsland() {
-	const { preference, effectiveMode, setMode } = useColorMode();
+	const { effectiveMode } = useColorMode();
 	const theme = useMemo(() => createAppTheme(effectiveMode), [effectiveMode]);
 	const isDesktop = useMediaQuery(theme.breakpoints.up("md"), {
 		defaultMatches: true,
@@ -65,33 +39,25 @@ export default function AppSidebarIsland() {
 	);
 	const [pathname, setPathname] = useState(readPathname);
 	const activeAlbum = useActiveAlbum();
-	const [mobileOpen, setMobileOpen] = useState(false);
+	const mobileOpen = useMobileNavOpen();
 
 	useEffect(() => {
 		function handleAfterSwap() {
 			setEmotionCache(createEmotionCache());
 			setPathname(readPathname());
 			syncActiveAlbumFromUrl();
-			setMobileOpen(false);
+			closeMobileNav();
 		}
 		document.addEventListener("astro:after-swap", handleAfterSwap);
 		return () =>
 			document.removeEventListener("astro:after-swap", handleAfterSwap);
 	}, []);
 
-	const {
-		authLoading,
-		authEmail,
-		authUserId,
-		isAdminUser,
-		avatarUrl,
-		nickname,
-	} = useAuthState();
+	const { authEmail, isAdminUser } = useAuthState();
 	const isSignedIn = Boolean(authEmail);
 	const isAdmin = isSignedIn && isAdminUser;
 
 	const { albumRecords, trackRecords } = useCatalogState();
-	const authDialog = useAuthDialogState();
 	const { albumsNote, saveAlbumsNote } = useAlbumsNote();
 	const [albumsNoteOpen, setAlbumsNoteOpen] = useState(false);
 	const [editAlbumId, setEditAlbumId] = useState<string | null>(null);
@@ -102,24 +68,10 @@ export default function AppSidebarIsland() {
 	const [newAlbumDescription, setNewAlbumDescription] = useState("");
 	const [newAlbumError, setNewAlbumError] = useState("");
 
-	const profileEditing = useProfileEditing({
-		authUserId,
-		nickname,
-		setAvatarUrl,
-		setNickname,
-	});
-
-	const themeOrder: ThemePreference[] = ["system", "light", "dark"];
-	function cycleThemeMode() {
-		const nextIndex =
-			(themeOrder.indexOf(preference) + 1) % themeOrder.length;
-		setMode(themeOrder[nextIndex]);
-	}
-
 	const isIndexPage = pathname === "/";
 
 	function goToAlbum(albumId: string) {
-		setMobileOpen(false);
+		closeMobileNav();
 		if (isIndexPage) {
 			setActiveAlbum(albumId);
 			const url = new URL(window.location.href);
@@ -158,7 +110,7 @@ export default function AppSidebarIsland() {
 	}
 
 	function openCreateAlbum() {
-		setMobileOpen(false);
+		closeMobileNav();
 		setNewAlbumTitle("");
 		setNewAlbumDescription("");
 		setNewAlbumError("");
@@ -187,13 +139,6 @@ export default function AppSidebarIsland() {
 		}
 	}
 
-	async function handleLogout() {
-		await logout();
-		if (pathname === "/upload") {
-			navigate("/");
-		}
-	}
-
 	const albumItems = buildAlbumItems(albumRecords, trackRecords.length).map(
 		(album) => ({
 			...album,
@@ -213,18 +158,6 @@ export default function AppSidebarIsland() {
 		onDeleteAlbum: handleDeleteAlbum,
 		onEditAlbum: handleEditAlbum,
 		onCreateAlbum: openCreateAlbum,
-		isSignedIn,
-		authLoading,
-		avatarUrl,
-		avatarError: profileEditing.avatarError,
-		nickname,
-		authEmail,
-		onOpenAvatarModal: () => profileEditing.setAvatarModalOpen(true),
-		onOpenNicknameEditor: profileEditing.openNicknameEditor,
-		onOpenLogin: openLoginDialog,
-		onLogout: handleLogout,
-		themePreference: preference,
-		onCycleTheme: cycleThemeMode,
 		onOpenAlbumsNote: () => setAlbumsNoteOpen(true),
 	};
 
@@ -235,67 +168,22 @@ export default function AppSidebarIsland() {
 				{isDesktop ? (
 					<AppSidebar {...sidebarProps} />
 				) : (
-					<>
-						<AppBar
-							position="sticky"
-							color="default"
-							elevation={0}
-							sx={{ top: 0 }}
-						>
-							<Toolbar sx={{ gap: 1.5 }}>
-								<IconButton
-									edge="start"
-									aria-label="Открыть меню"
-									onClick={() => setMobileOpen(true)}
-								>
-									<FiMenu size={22} />
-								</IconButton>
-								<Typography sx={{ fontWeight: 800 }} noWrap>
-									НейроСэм
-								</Typography>
-							</Toolbar>
-						</AppBar>
-						<Drawer
-							anchor="left"
-							open={mobileOpen}
-							onClose={() => setMobileOpen(false)}
-							ModalProps={{ keepMounted: true }}
-							sx={{ zIndex: 1400 }}
-							slotProps={{
-								paper: { sx: { width: "100%" } },
-							}}
-						>
-							<AppSidebar
-								{...sidebarProps}
-								onClose={() => setMobileOpen(false)}
-							/>
-						</Drawer>
-					</>
+					<Drawer
+						anchor="left"
+						open={mobileOpen}
+						onClose={() => closeMobileNav()}
+						ModalProps={{ keepMounted: true }}
+						sx={{ zIndex: 1400 }}
+						slotProps={{
+							paper: { sx: { width: "100%" } },
+						}}
+					>
+						<AppSidebar
+							{...sidebarProps}
+							onClose={() => closeMobileNav()}
+						/>
+					</Drawer>
 				)}
-
-				<LoginDialog
-					open={authDialog.loginOpen}
-					onClose={() => setLoginOpen(false)}
-					authMode={authDialog.authMode}
-					onToggleAuthMode={toggleAuthMode}
-					login={authDialog.login}
-					onLoginChange={setLogin}
-					password={authDialog.password}
-					onPasswordChange={setPassword}
-					authNotice={authDialog.authNotice}
-					authError={authDialog.authError}
-					authSubmitting={authDialog.authSubmitting}
-					onSubmit={handleAuthSubmit}
-				/>
-
-				<NicknameDialog
-					open={profileEditing.nicknameModalOpen}
-					onClose={() => profileEditing.setNicknameModalOpen(false)}
-					nicknameInput={profileEditing.nicknameInput}
-					onNicknameInputChange={profileEditing.setNicknameInput}
-					nicknameError={profileEditing.nicknameError}
-					onSubmit={profileEditing.handleNicknameSubmit}
-				/>
 
 				<AlbumFormDialog
 					open={Boolean(editAlbumId)}
@@ -319,12 +207,6 @@ export default function AppSidebarIsland() {
 					description={newAlbumDescription}
 					onDescriptionChange={setNewAlbumDescription}
 					onSubmit={handleCreateAlbum}
-				/>
-
-				<AvatarCropDialog
-					open={profileEditing.avatarModalOpen}
-					onClose={() => profileEditing.setAvatarModalOpen(false)}
-					onSave={profileEditing.saveAvatarBlob}
 				/>
 
 				<AlbumsNoteDialog

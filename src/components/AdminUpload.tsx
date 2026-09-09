@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
 	Alert,
-	AppBar,
 	Box,
 	CssBaseline,
 	Stack,
 	ThemeProvider,
-	Toolbar,
 	Typography,
 } from "@mui/material";
 import { CacheProvider } from "@emotion/react";
@@ -62,22 +60,6 @@ export default function AdminUpload() {
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
 				<Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-					<AppBar
-						position="sticky"
-						color="inherit"
-						elevation={0}
-						sx={{ borderBottom: 1, borderColor: "divider" }}
-					>
-						<Toolbar sx={{ gap: 1.5 }}>
-							<Typography
-								variant="subtitle1"
-								sx={{ fontWeight: 800, flex: 1 }}
-							>
-								Загрузка треков
-							</Typography>
-						</Toolbar>
-					</AppBar>
-
 					<Box
 						sx={{
 							maxWidth: 1600,

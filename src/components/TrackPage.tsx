@@ -2,18 +2,14 @@ import { useEffect, useMemo } from "react";
 import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
 import {
-	AppBar,
 	Box,
 	Card,
 	CardContent,
 	CircularProgress,
-	IconButton,
 	Stack,
 	ThemeProvider,
-	Toolbar,
 	Typography,
 } from "@mui/material";
-import { FiArrowLeft } from "react-icons/fi";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
 import { useAuthState, setMyCommentVotes, setMyVotes } from "../lib/authStore";
@@ -198,30 +194,6 @@ export default function TrackPage({ trackId }: Props) {
 		<CacheProvider value={emotionCache}>
 			<ThemeProvider theme={theme}>
 				<Box sx={{ bgcolor: "background.default" }}>
-					<AppBar
-						position="sticky"
-						color="inherit"
-						elevation={0}
-						sx={{ borderBottom: 1, borderColor: "divider" }}
-					>
-						<Toolbar sx={{ gap: 1.5 }}>
-							<IconButton
-								aria-label="Назад"
-								href="/"
-								edge="start"
-							>
-								<FiArrowLeft size={20} />
-							</IconButton>
-							<Typography
-								variant="subtitle1"
-								sx={{ fontWeight: 800 }}
-								noWrap
-							>
-								Чат
-							</Typography>
-						</Toolbar>
-					</AppBar>
-
 					<Box
 						component="main"
 						sx={{

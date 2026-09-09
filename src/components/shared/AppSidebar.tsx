@@ -9,28 +9,19 @@ import {
 	ListItemText,
 	Menu,
 	MenuItem,
-	Skeleton,
 	Stack,
 	Toolbar,
 	Typography,
 } from "@mui/material";
 import {
-	FiCamera,
 	FiEdit2,
-	FiInfo,
-	FiLogOut,
-	FiMail,
-	FiMoon,
 	FiFolderPlus,
-	FiMonitor,
+	FiInfo,
 	FiMoreVertical,
 	FiMusic,
-	FiSun,
 	FiTrash2,
 	FiX,
 } from "react-icons/fi";
-import type { ThemePreference } from "../../lib/theme";
-import AccountCard from "./AccountCard";
 
 export type AlbumItem = {
 	id: string;
@@ -47,33 +38,8 @@ type Props = {
 	onDeleteAlbum?: (albumId: string) => void;
 	onEditAlbum?: (albumId: string) => void;
 	onCreateAlbum?: () => void;
-	isSignedIn: boolean;
-	authLoading?: boolean;
-	avatarUrl: string;
-	avatarError?: string;
-	nickname: string;
-	authEmail?: string;
-	onOpenAvatarModal: () => void;
-	onOpenNicknameEditor: () => void;
-	onOpenLogin?: () => void;
-	loginHref?: string;
-	onLogout: () => void;
-	themePreference: ThemePreference;
-	onCycleTheme: () => void;
 	onOpenAlbumsNote?: () => void;
 	onClose?: () => void;
-};
-
-const themeLabels: Record<ThemePreference, string> = {
-	system: "Системная",
-	light: "Светлая",
-	dark: "Тёмная",
-};
-
-const themeIcons: Record<ThemePreference, React.ReactNode> = {
-	system: <FiMonitor size={20} />,
-	light: <FiSun size={20} />,
-	dark: <FiMoon size={20} />,
 };
 
 export default function AppSidebar({
@@ -84,19 +50,6 @@ export default function AppSidebar({
 	onDeleteAlbum,
 	onEditAlbum,
 	onCreateAlbum,
-	isSignedIn,
-	authLoading = false,
-	avatarUrl,
-	avatarError,
-	nickname,
-	authEmail,
-	onOpenAvatarModal,
-	onOpenNicknameEditor,
-	onOpenLogin,
-	loginHref,
-	onLogout,
-	themePreference,
-	onCycleTheme,
 	onOpenAlbumsNote,
 	onClose,
 }: Props) {
@@ -254,88 +207,6 @@ export default function AppSidebar({
 					Удалить
 				</MenuItem>
 			</Menu>
-			<Divider />
-			<Box sx={{ p: 2 }}>
-				{authLoading ? (
-					<Stack
-						direction="row"
-						spacing={1.25}
-						sx={{ alignItems: "center" }}
-					>
-						<Skeleton variant="circular" width={40} height={40} />
-						<Skeleton variant="text" width={120} height={20} />
-					</Stack>
-				) : isSignedIn ? (
-					<AccountCard
-						avatarUrl={avatarUrl}
-						nickname={nickname || authEmail || "Гость"}
-						fallbackText={nickname || authEmail || "?"}
-						roleLabel={isAdmin ? "Администратор" : undefined}
-						error={avatarError}
-						onAvatarClick={onOpenAvatarModal}
-						onNameClick={onOpenNicknameEditor}
-						menuItems={[
-							{
-								key: "avatar",
-								icon: <FiCamera size={20} />,
-								label: "Сменить аватар",
-								onClick: onOpenAvatarModal,
-							},
-							{
-								key: "nickname",
-								icon: <FiEdit2 size={20} />,
-								label: "Сменить никнейм",
-								onClick: onOpenNicknameEditor,
-							},
-							{
-								key: "theme",
-								icon: themeIcons[themePreference],
-								label: `Тема: ${themeLabels[themePreference]}`,
-								onClick: onCycleTheme,
-								dividerBefore: true,
-							},
-							{
-								key: "logout",
-								icon: <FiLogOut size={20} />,
-								label: "Выйти",
-								onClick: onLogout,
-								dividerBefore: true,
-							},
-						]}
-					/>
-				) : (
-					<Stack
-						direction="row"
-						sx={{
-							alignItems: "center",
-							justifyContent: "space-between",
-						}}
-					>
-						<Button
-							variant="text"
-							size="small"
-							href={onOpenLogin ? undefined : loginHref}
-							onClick={onOpenLogin}
-							startIcon={<FiMail size={20} />}
-							sx={{
-								color: "text.secondary",
-								px: 0.5,
-								fontWeight: 500,
-							}}
-						>
-							Войти по почте
-						</Button>
-						<IconButton
-							size="small"
-							onClick={onCycleTheme}
-							aria-label={`Тема: ${themeLabels[themePreference]}. Переключить`}
-							sx={{ color: "text.secondary" }}
-						>
-							{themeIcons[themePreference]}
-						</IconButton>
-					</Stack>
-				)}
-			</Box>
 		</Box>
 	);
 }

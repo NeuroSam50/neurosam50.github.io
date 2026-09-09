@@ -2,17 +2,21 @@
 import { ClientRouter } from "astro:transitions";
 import GlobalPlayer from "../components/GlobalPlayer";
 import AppSidebarIsland from "../components/shared/AppSidebarIsland";
+import PageHeader from "../components/shared/PageHeader";
 import UiFeedback from "../components/shared/UiFeedback";
 import "../styles/global.scss";
 
 type Props = {
 	title: string;
+	headerTitle?: string;
+	headerBackHref?: string;
 	description?: string;
 	robots?: string;
 	image?: string;
 };
 
-const { title, description, robots, image } = Astro.props;
+const { title, headerTitle, headerBackHref, description, robots, image } =
+	Astro.props;
 
 const canonical = Astro.site
 	? new URL(Astro.url.pathname, Astro.site).href
@@ -113,6 +117,11 @@ const ogImage =
 				/>
 			</div>
 			<div class="app-shell__content">
+				<PageHeader
+					client:only="react"
+					title={headerTitle ?? title}
+					backHref={headerBackHref}
+				/>
 				<slot />
 			</div>
 		</div>

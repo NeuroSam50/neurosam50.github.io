@@ -3,7 +3,6 @@ import { navigate } from "astro:transitions/client";
 import { CacheProvider } from "@emotion/react";
 import {
 	Alert,
-	AppBar,
 	Box,
 	Button,
 	Card,
@@ -13,12 +12,12 @@ import {
 	Stack,
 	TextField,
 	ThemeProvider,
-	Toolbar,
 	Typography,
 } from "@mui/material";
 import { FiSearch, FiUploadCloud } from "react-icons/fi";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
+import { setPageTitle } from "../lib/pageTitleStore";
 import { useAuthState, setMyVotes } from "../lib/authStore";
 import {
 	useCatalogState,
@@ -96,6 +95,8 @@ export default function MusicApp() {
 			activeAlbum === "all"
 				? "НейроСэм"
 				: `${currentViewTitle} - НейроСэм`;
+		setPageTitle(currentViewTitle);
+		return () => setPageTitle("");
 	}, [activeAlbum, currentViewTitle]);
 
 	function renderCatalog() {
@@ -158,23 +159,6 @@ export default function MusicApp() {
 		<CacheProvider value={emotionCache}>
 			<ThemeProvider theme={theme}>
 				<Box sx={{ bgcolor: "background.default" }}>
-					<AppBar
-						position="sticky"
-						color="inherit"
-						elevation={0}
-						sx={{ borderBottom: 1, borderColor: "divider" }}
-					>
-						<Toolbar sx={{ gap: 1.5 }}>
-							<Typography
-								variant="subtitle1"
-								sx={{ fontWeight: 800 }}
-								noWrap
-							>
-								{currentViewTitle}
-							</Typography>
-						</Toolbar>
-					</AppBar>
-
 					<Box
 						component="main"
 						sx={{
