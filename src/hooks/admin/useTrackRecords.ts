@@ -18,7 +18,7 @@ export function useTrackRecords() {
 		const { data, error } = await supabase
 			.from("tracks")
 			.select("id,title,artist,album_id,year,duration,cover_path,lyrics")
-			.order("position", { ascending: true });
+			.order("position", { ascending: false });
 		setLoading(false);
 
 		if (error) {

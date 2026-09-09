@@ -25,7 +25,7 @@ export async function fetchPublishedTracks(): Promise<StaticTrack[]> {
 		.from("tracks")
 		.select("id,title,artist,year,duration,lyrics,cover_path,albums(title)")
 		.eq("published", true)
-		.order("position", { ascending: true });
+		.order("position", { ascending: false });
 
 	if (error || !data) {
 		return [];

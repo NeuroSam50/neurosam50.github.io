@@ -162,7 +162,7 @@ export function useTrackUpload({ onSaved }: Params) {
 		setTrackForm({
 			title: track.title,
 			artist: track.artist,
-			album: track.album_id,
+			album: track.album_id || "",
 			lyrics: track.lyrics || "",
 		});
 		setTrackYear(track.year);
@@ -202,10 +202,11 @@ export function useTrackUpload({ onSaved }: Params) {
 			return;
 		}
 
-		const albumId = albumOverride || trackForm.album;
+		const albumId =
+			albumOverride !== undefined ? albumOverride : trackForm.album;
 
-		if (!trackForm.title.trim() || !albumId) {
-			setUploadError("Укажите название и альбом.");
+		if (!trackForm.title.trim()) {
+			setUploadError("Укажите название трека.");
 			return;
 		}
 
@@ -214,7 +215,7 @@ export function useTrackUpload({ onSaved }: Params) {
 			return;
 		}
 
-		if (albumOverride) {
+		if (albumOverride !== undefined) {
 			setTrackForm((current) => ({ ...current, album: albumOverride }));
 		}
 
@@ -284,7 +285,7 @@ export function useTrackUpload({ onSaved }: Params) {
 				const updatePayload: Record<string, unknown> = {
 					title: trackForm.title.trim(),
 					artist: trackForm.artist.trim() || "NeuroSam",
-					album_id: albumId,
+					album_id: albumId || null,
 					year: trackYear,
 					lyrics: trackForm.lyrics.trim(),
 				};
@@ -331,7 +332,7 @@ export function useTrackUpload({ onSaved }: Params) {
 					id: trackId,
 					title: trackForm.title.trim(),
 					artist: trackForm.artist.trim() || "NeuroSam",
-					album_id: albumId,
+					album_id: albumId || null,
 					year: trackYear,
 					duration: trackDuration,
 					audio_path: audioPublicUrl,

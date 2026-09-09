@@ -167,17 +167,16 @@ export default function TrackFormCard({
 	);
 	const canSave =
 		Boolean(trackForm.title.trim()) &&
-		albumRecords.length > 0 &&
 		(isEditing || Boolean(trackFile)) &&
 		!trackDurationLoading &&
 		!saving;
 
 	function handleUploadClick(event: MouseEvent<HTMLElement>) {
-		if (albumRecords.length > 1) {
+		if (albumRecords.length > 0) {
 			onOpenAlbumMenu(event.currentTarget);
 			return;
 		}
-		onSaveTrack(selectedAlbum?.id ?? albumRecords[0]?.id);
+		onSaveTrack("");
 	}
 
 	function handlePickAlbum(albumId: string) {
@@ -209,9 +208,6 @@ export default function TrackFormCard({
 							</Button>
 						)}
 					</Stack>
-					{albumRecords.length === 0 && (
-						<Alert severity="info">Сначала создайте альбом.</Alert>
-					)}
 
 					<Stack
 						direction="row"
@@ -434,6 +430,15 @@ export default function TrackFormCard({
 							horizontal: "right",
 						}}
 					>
+						<MenuItem
+							selected={!trackForm.album}
+							onClick={() => handlePickAlbum("")}
+						>
+							{!trackForm.album && (
+								<FiCheck size={16} style={{ marginRight: 8 }} />
+							)}
+							Без альбома
+						</MenuItem>
 						{albumRecords.map((album) => (
 							<MenuItem
 								key={album.id}

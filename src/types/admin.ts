@@ -6,7 +6,7 @@ export type AdminTrackRow = {
 	id: string;
 	title: string;
 	artist: string;
-	album_id: string;
+	album_id: string | null;
 	year: number;
 	duration: string;
 	cover_path: string | null;

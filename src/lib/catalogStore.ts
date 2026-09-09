@@ -63,7 +63,7 @@ async function loadRemoteData() {
 				"id,title,artist,album_id,year,duration,mood,cover_path,audio_path,download_path,up_count,comment_count,lyrics",
 			)
 			.eq("published", true)
-			.order("position", { ascending: true }),
+			.order("position", { ascending: false }),
 	]);
 
 	if (albumsError || tracksError) {
@@ -85,7 +85,7 @@ async function loadRemoteData() {
 			id: track.id,
 			title: track.title,
 			artist: track.artist,
-			album: track.album_id,
+			album: track.album_id || "",
 			year: track.year,
 			duration: track.duration,
 			mood: track.mood,
