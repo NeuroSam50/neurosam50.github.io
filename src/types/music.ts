@@ -18,6 +18,8 @@ export type Track = {
 	up: number;
 	commentCount: number;
 	lyrics: string;
+	position: number;
+	albumPosition: number;
 };
 
 export type Comment = {

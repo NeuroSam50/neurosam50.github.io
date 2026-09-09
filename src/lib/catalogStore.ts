@@ -60,7 +60,7 @@ async function loadRemoteData() {
 		supabase
 			.from("tracks")
 			.select(
-				"id,title,artist,album_id,year,duration,mood,cover_path,audio_path,download_path,up_count,comment_count,lyrics",
+				"id,title,artist,album_id,year,duration,mood,cover_path,audio_path,download_path,up_count,comment_count,lyrics,position,album_position",
 			)
 			.eq("published", true)
 			.order("position", { ascending: false }),
@@ -95,6 +95,8 @@ async function loadRemoteData() {
 			up: track.up_count,
 			commentCount: track.comment_count,
 			lyrics: track.lyrics || "",
+			position: track.position,
+			albumPosition: track.album_position,
 		})),
 	});
 }
@@ -276,6 +278,38 @@ export async function createAlbum(form: {
 		],
 	});
 	return { albumId, error: "" };
+}
+
+export async function reorderTracks(
+	updates: { id: string; position: number }[],
+	column: "position" | "album_position" = "position",
+) {
+	if (!supabase) {
+		return false;
+	}
+
+	const client = supabase;
+	const results = await Promise.all(
+		updates.map(({ id, position }) =>
+			client
+				.from("tracks")
+				.update({ [column]: position })
+				.eq("id", id),
+		),
+	);
+
+	const failed = results.find((result) => result.error);
+
+	if (failed) {
+		notify(
+			describeError(failed.error, "Не удалось сохранить порядок треков."),
+			"error",
+		);
+		return false;
+	}
+
+	refreshCatalog();
+	return true;
 }
 
 function subscribe(listener: () => void) {

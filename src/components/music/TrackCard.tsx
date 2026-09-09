@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
 	Box,
 	Button,
@@ -58,6 +58,7 @@ type Props = {
 	onDelete: () => void;
 	onOpenComments?: () => void;
 	onSaveLyrics?: (lyrics: string) => Promise<boolean> | void;
+	dragHandle?: ReactNode;
 };
 
 export default function TrackCard({
@@ -71,6 +72,7 @@ export default function TrackCard({
 	onDelete,
 	onOpenComments,
 	onSaveLyrics,
+	dragHandle,
 }: Props) {
 	const isCurrentlyPlaying = isCurrent && isPlaying;
 	const [isDownloading, setIsDownloading] = useState(false);
@@ -149,6 +151,7 @@ export default function TrackCard({
 								spacing={1.5}
 								sx={{ minWidth: 0, alignItems: "center" }}
 							>
+								{dragHandle}
 								<Avatar
 									src={track.cover || undefined}
 									alt=""
