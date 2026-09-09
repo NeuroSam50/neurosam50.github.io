@@ -28,6 +28,7 @@ import {
 	useSortable,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
@@ -333,6 +334,7 @@ export default function MusicApp() {
 				sensors={sensors}
 				collisionDetection={closestCenter}
 				onDragEnd={handleDragEnd}
+				modifiers={[restrictToVerticalAxis, restrictToParentElement]}
 			>
 				<SortableContext
 					items={visibleTracks.map((track) => track.id)}
