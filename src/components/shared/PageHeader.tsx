@@ -42,6 +42,7 @@ import {
 	setPassword,
 	openLoginDialog,
 	toggleAuthMode,
+	openForgotPassword,
 	handleAuthSubmit,
 } from "../../lib/authDialogStore";
 import { useProfileEditing } from "../../hooks/music/useProfileEditing";
@@ -256,6 +257,7 @@ export default function PageHeader({ title, backHref }: Props) {
 					onClose={() => setLoginOpen(false)}
 					authMode={authDialog.authMode}
 					onToggleAuthMode={toggleAuthMode}
+					onForgotPassword={openForgotPassword}
 					login={authDialog.login}
 					onLoginChange={setLogin}
 					password={authDialog.password}

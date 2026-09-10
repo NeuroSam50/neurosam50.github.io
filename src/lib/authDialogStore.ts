@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "./supabase";
 
-type AuthMode = "login" | "signup";
+type AuthMode = "login" | "signup" | "forgot";
 
 type AuthDialogState = {
 	loginOpen: boolean;
@@ -59,6 +59,14 @@ export function toggleAuthMode() {
 	});
 }
 
+export function openForgotPassword() {
+	patch({
+		authMode: "forgot",
+		authError: "",
+		authNotice: "",
+	});
+}
+
 export function requireAuth(authUserId: string) {
 	if (authUserId) {
 		return true;
@@ -82,14 +90,36 @@ export async function handleAuthSubmit() {
 	const email = state.login.trim();
 	const password = state.password;
 
-	if (!email || !password) {
-		patch({ authError: "Укажите почту и пароль." });
+	if (!email) {
+		patch({ authError: "Укажите почту." });
+		return;
+	}
+
+	if (state.authMode !== "forgot" && !password) {
+		patch({ authError: "Укажите пароль." });
 		return;
 	}
 
 	patch({ authSubmitting: true });
 
 	try {
+		if (state.authMode === "forgot") {
+			const { error } = await supabase.auth.resetPasswordForEmail(email, {
+				redirectTo: `${window.location.origin}/reset-password`,
+			});
+
+			if (error) {
+				patch({ authError: "Не удалось отправить письмо. Проверьте адрес почты." });
+				return;
+			}
+
+			patch({
+				authNotice: "Письмо со ссылкой для смены пароля отправлено на почту.",
+				authMode: "login",
+			});
+			return;
+		}
+
 		if (state.authMode === "signup") {
 			const { data, error } = await supabase.auth.signUp({
 				email,

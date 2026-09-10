@@ -16,8 +16,9 @@ import { hasSupabaseConfig } from "../../lib/supabase";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	authMode: "login" | "signup";
+	authMode: "login" | "signup" | "forgot";
 	onToggleAuthMode: () => void;
+	onForgotPassword: () => void;
 	login: string;
 	onLoginChange: (value: string) => void;
 	password: string;
@@ -33,6 +34,7 @@ export default function LoginDialog({
 	onClose,
 	authMode,
 	onToggleAuthMode,
+	onForgotPassword,
 	login,
 	onLoginChange,
 	password,
@@ -46,7 +48,7 @@ export default function LoginDialog({
 		hasSupabaseConfig &&
 		!authSubmitting &&
 		login.trim() !== "" &&
-		password !== "";
+		(authMode === "forgot" || password !== "");
 
 	return (
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -60,7 +62,11 @@ export default function LoginDialog({
 				}}
 			>
 				<DialogTitle>
-					{authMode === "login" ? "Вход по почте" : "Регистрация"}
+					{authMode === "login"
+						? "Вход по почте"
+						: authMode === "signup"
+							? "Регистрация"
+							: "Восстановление пароля"}
 				</DialogTitle>
 				<DialogContent>
 					<Stack spacing={2} sx={{ pt: 1 }}>
@@ -80,39 +86,63 @@ export default function LoginDialog({
 							disabled={authSubmitting}
 							fullWidth
 						/>
-						<TextField
-							label="Пароль"
-							type="password"
-							value={password}
-							onChange={(event) =>
-								onPasswordChange(event.target.value)
-							}
-							autoComplete={
-								authMode === "login"
-									? "current-password"
-									: "new-password"
-							}
-							disabled={authSubmitting}
-							fullWidth
-						/>
+						{authMode !== "forgot" && (
+							<TextField
+								label="Пароль"
+								type="password"
+								value={password}
+								onChange={(event) =>
+									onPasswordChange(event.target.value)
+								}
+								autoComplete={
+									authMode === "login"
+										? "current-password"
+										: "new-password"
+								}
+								disabled={authSubmitting}
+								fullWidth
+							/>
+						)}
 						{authNotice && (
 							<Alert severity="success">{authNotice}</Alert>
 						)}
 						{authError && (
 							<Alert severity="error">{authError}</Alert>
 						)}
-						<Button
-							variant="text"
-							size="small"
-							type="button"
-							sx={{ alignSelf: "flex-start" }}
-							onClick={onToggleAuthMode}
-							disabled={authSubmitting}
+						<Stack
+							direction="row"
+							sx={{
+								flexWrap: "wrap",
+								justifyContent: "space-between",
+							}}
 						>
-							{authMode === "login"
-								? "Нет аккаунта? Зарегистрироваться"
-								: "Уже есть аккаунт? Войти"}
-						</Button>
+							{authMode !== "forgot" && (
+								<Button
+									variant="text"
+									size="small"
+									type="button"
+									sx={{ alignSelf: "flex-start" }}
+									onClick={onToggleAuthMode}
+									disabled={authSubmitting}
+								>
+									{authMode === "login"
+										? "Нет аккаунта? Зарегистрироваться"
+										: "Уже есть аккаунт? Войти"}
+								</Button>
+							)}
+							{authMode === "login" && (
+								<Button
+									variant="text"
+									size="small"
+									type="button"
+									sx={{ alignSelf: "flex-start" }}
+									onClick={onForgotPassword}
+									disabled={authSubmitting}
+								>
+									Забыли пароль?
+								</Button>
+							)}
+						</Stack>
 					</Stack>
 				</DialogContent>
 				<DialogActions>
@@ -140,7 +170,11 @@ export default function LoginDialog({
 							)
 						}
 					>
-						{authMode === "login" ? "Войти" : "Зарегистрироваться"}
+						{authMode === "login"
+							? "Войти"
+							: authMode === "signup"
+								? "Зарегистрироваться"
+								: "Отправить письмо"}
 					</Button>
 				</DialogActions>
 			</Box>
