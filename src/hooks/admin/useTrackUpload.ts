@@ -326,6 +326,15 @@ export function useTrackUpload({ onSaved }: Params) {
 				.from("tracks")
 				.select("id", { count: "exact", head: true });
 
+			let albumCount = 0;
+			if (albumId) {
+				const { count: albumTrackCount } = await supabase
+					.from("tracks")
+					.select("id", { count: "exact", head: true })
+					.eq("album_id", albumId);
+				albumCount = albumTrackCount || 0;
+			}
+
 			const { error: insertError } = await supabase
 				.from("tracks")
 				.insert({
@@ -340,6 +349,7 @@ export function useTrackUpload({ onSaved }: Params) {
 					cover_path: coverPublicUrl || null,
 					published: true,
 					position: (count || 0) + 10,
+					album_position: albumId ? albumCount * 10 + 10 : 0,
 					up_count: 0,
 					lyrics: trackForm.lyrics.trim(),
 				});
