@@ -16,28 +16,26 @@ import {
 	FiPlay,
 	FiVolume2,
 	FiVolumeX,
-	FiX,
 } from "react-icons/fi";
 import { createAppTheme, drawerWidth, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
 import {
-	closePlayer,
 	hasNext,
 	playNext,
 	togglePlay,
 	usePlayerState,
 } from "../lib/playerStore";
 
-const VOLUME_STORAGE_KEY = "neurosam-player-volume";
+const VOLUME_STORAGE_KEY = "neurosam-player-volume-v2";
 
 function readStoredVolume() {
 	if (typeof window === "undefined") {
-		return 80;
+		return 100;
 	}
 	const stored = Number(window.localStorage.getItem(VOLUME_STORAGE_KEY));
 	return Number.isFinite(stored) && stored >= 0 && stored <= 100
 		? stored
-		: 80;
+		: 100;
 }
 
 function formatTime(seconds: number) {
@@ -69,7 +67,7 @@ export default function GlobalPlayer() {
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
-	const [volume, setVolume] = useState(readStoredVolume);
+	const [volume, setVolume] = useState(100);
 	const [mutedVolume, setMutedVolume] = useState<number | null>(null);
 
 	const canGoNext = hasNext();
@@ -155,147 +153,159 @@ export default function GlobalPlayer() {
 						/>
 					)}
 					<Stack
-						direction="row"
-						spacing={{ xs: 0.75, sm: 1.25 }}
-						sx={{ alignItems: "center", opacity: track ? 1 : 0.5 }}
+						direction={{ xs: "column", sm: "row" }}
+						spacing={{ xs: 1, sm: 1.25 }}
+						sx={{ alignItems: { xs: "stretch", sm: "center" }, opacity: track ? 1 : 0.5 }}
 					>
-						<IconButton
-							onClick={togglePlay}
-							disabled={!track}
-							aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
-							sx={{
-								position: "relative",
-								width: 40,
-								height: 40,
-								flexShrink: 0,
-								borderRadius: 0.5,
-								padding: 0,
-								overflow: "hidden",
-								"&:hover .cover-play-overlay": { opacity: 1 },
-							}}
+						<Stack
+							direction="row"
+							spacing={{ xs: 0.75, sm: 1.25 }}
+							sx={{ alignItems: "center", minWidth: 0, flexShrink: 0 }}
 						>
-							<Avatar
-								variant="rounded"
-								src={track?.cover || undefined}
-								alt=""
+							<IconButton
+								onClick={togglePlay}
+								disabled={!track}
+								aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
 								sx={{
-									width: "100%",
-									height: "100%",
-									bgcolor: "action.selected",
-									color: "text.secondary",
+									position: "relative",
+									width: 40,
+									height: 40,
+									flexShrink: 0,
 									borderRadius: 0.5,
+									padding: 0,
+									overflow: "hidden",
+									"&:hover .cover-play-overlay": { opacity: 1 },
 								}}
 							>
-								<FiMusic size={20} />
-							</Avatar>
-							{track && (
-								<Box
-									className="cover-play-overlay"
+								<Avatar
+									variant="rounded"
+									src={track?.cover || undefined}
+									alt=""
 									sx={{
-										position: "absolute",
-										inset: 0,
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
-										bgcolor: alpha(
-											theme.palette.common.black,
-											0.45,
-										),
-										color: theme.palette.common.white,
-										opacity: isPlaying ? 0 : 1,
-										transition: "opacity 0.15s",
+										width: "100%",
+										height: "100%",
+										bgcolor: "action.selected",
+										color: "text.secondary",
+										borderRadius: 0.5,
 									}}
 								>
-									{isPlaying ? (
-										<FiPause size={20} />
-									) : (
-										<FiPlay size={20} />
-									)}
-								</Box>
-							)}
-						</IconButton>
+									<FiMusic size={20} />
+								</Avatar>
+								{track && (
+									<Box
+										className="cover-play-overlay"
+										sx={{
+											position: "absolute",
+											inset: 0,
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											bgcolor: alpha(
+												theme.palette.common.black,
+												0.45,
+											),
+											color: theme.palette.common.white,
+											opacity: isPlaying ? 0 : 1,
+											transition: "opacity 0.15s",
+										}}
+									>
+										{isPlaying ? (
+											<FiPause size={20} />
+										) : (
+											<FiPlay size={20} />
+										)}
+									</Box>
+								)}
+							</IconButton>
 
-						<Box
-							sx={{
-								minWidth: 0,
-								width: { xs: 80, sm: 160 },
-								height: 40,
-								flexShrink: 0,
-								display: "flex",
-								flexDirection: "column",
-								justifyContent: "center",
-								textAlign: track ? "left" : "center",
-							}}
-						>
-							<Typography
-								noWrap
-								variant="subtitle2"
-								sx={{ fontWeight: 700 }}
+							<Box
+								sx={{
+									minWidth: 0,
+									flex: 1,
+									height: 40,
+									display: "flex",
+									flexDirection: "column",
+									justifyContent: "center",
+									textAlign: track ? "left" : "center",
+								}}
 							>
-								{track ? track.title : "Ничего не играет"}
-							</Typography>
-							{track && (
 								<Typography
 									noWrap
-									variant="caption"
-									sx={{ opacity: 0.65 }}
+									variant="subtitle2"
+									sx={{ fontWeight: 700 }}
 								>
-									{track.artist}
+									{track ? track.title : "Ничего не играет"}
 								</Typography>
-							)}
-						</Box>
+								{track && (
+									<Typography
+										noWrap
+										variant="caption"
+										sx={{ opacity: 0.65 }}
+									>
+										{track.artist}
+									</Typography>
+								)}
+							</Box>
+						</Stack>
 
-						<Typography
-							variant="caption"
-							sx={{
-								opacity: 0.65,
-								minWidth: 34,
-								textAlign: "right",
-							}}
+						<Stack
+							direction="row"
+							spacing={{ xs: 0.75, sm: 1.25 }}
+							sx={{ alignItems: "center", minWidth: 0, flex: 1 }}
 						>
-							{formatTime(currentTime)}
-						</Typography>
+							<Typography
+								variant="caption"
+								sx={{
+									opacity: 0.65,
+									minWidth: 34,
+									textAlign: "right",
+									flexShrink: 0,
+								}}
+							>
+								{formatTime(currentTime)}
+							</Typography>
 
-						<Slider
-							size="small"
-							aria-label="Позиция воспроизведения"
-							getAriaValueText={(value) => formatTime(value)}
-							value={Math.min(currentTime, duration || 0)}
-							max={duration || 0}
-							disabled={!track}
-							onChange={(_, value) => {
-								const next = Array.isArray(value)
-									? value[0]
-									: value;
-								setCurrentTime(next);
-								if (audioRef.current) {
-									audioRef.current.currentTime = next;
-								}
-							}}
-							sx={{
-								color: "secondary.main",
-								flex: 1,
-								"& .MuiSlider-thumb": {
-									width: 12,
-									height: 12,
-									transition: "box-shadow 0.15s",
-									"&:hover, &.Mui-focusVisible": {
-										boxShadow: `0 0 0 8px ${alpha(
-											theme.palette.secondary.main,
-											0.16,
-										)}`,
+							<Slider
+								size="small"
+								aria-label="Позиция воспроизведения"
+								getAriaValueText={(value) => formatTime(value)}
+								value={Math.min(currentTime, duration || 0)}
+								max={duration || 0}
+								disabled={!track}
+								onChange={(_, value) => {
+									const next = Array.isArray(value)
+										? value[0]
+										: value;
+									setCurrentTime(next);
+									if (audioRef.current) {
+										audioRef.current.currentTime = next;
+									}
+								}}
+								sx={{
+									color: "secondary.main",
+									flex: 1,
+									"& .MuiSlider-thumb": {
+										width: 12,
+										height: 12,
+										transition: "box-shadow 0.15s",
+										"&:hover, &.Mui-focusVisible": {
+											boxShadow: `0 0 0 8px ${alpha(
+												theme.palette.secondary.main,
+												0.16,
+											)}`,
+										},
 									},
-								},
-								"& .MuiSlider-rail": { opacity: 0.25 },
-							}}
-						/>
+									"& .MuiSlider-rail": { opacity: 0.25 },
+								}}
+							/>
 
-						<Typography
-							variant="caption"
-							sx={{ opacity: 0.65, minWidth: 34 }}
-						>
-							{formatTime(duration)}
-						</Typography>
+							<Typography
+								variant="caption"
+								sx={{ opacity: 0.65, minWidth: 34, flexShrink: 0 }}
+							>
+								{formatTime(duration)}
+							</Typography>
+						</Stack>
 
 						<Stack
 							direction="row"
@@ -338,20 +348,6 @@ export default function GlobalPlayer() {
 							/>
 						</Stack>
 
-						{track && (
-							<IconButton
-								size="small"
-								onClick={closePlayer}
-								aria-label="Закрыть плеер"
-								sx={{
-									color: "text.primary",
-									opacity: 0.7,
-									flexShrink: 0,
-								}}
-							>
-								<FiX size={20} />
-							</IconButton>
-						)}
 					</Stack>
 				</Box>
 			</ThemeProvider>
