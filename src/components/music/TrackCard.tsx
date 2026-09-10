@@ -204,6 +204,32 @@ export default function TrackCard({
 									width: { xs: "100%", sm: "auto" },
 								}}
 							>
+								<IconButton
+									aria-label={
+										isCurrentlyPlaying ? "Пауза" : "Слушать"
+									}
+									onClick={onPlay}
+									sx={{
+										bgcolor: isCurrentlyPlaying
+											? "secondary.main"
+											: "action.selected",
+										color: isCurrentlyPlaying
+											? "secondary.contrastText"
+											: "text.primary",
+										borderRadius: "50%",
+										"&:hover": {
+											bgcolor: isCurrentlyPlaying
+												? "secondary.dark"
+												: "action.hover",
+										},
+									}}
+								>
+									{isCurrentlyPlaying ? (
+										<FiPause size={20} />
+									) : (
+										<FiPlay size={20} />
+									)}
+								</IconButton>
 								{showLyricsButton && (
 									<IconButton
 										aria-label={
@@ -270,7 +296,6 @@ export default function TrackCard({
 									aria-label="Скачать трек"
 									onClick={handleDownload}
 									disabled={isDownloading}
-									sx={{ order: { xs: 0, sm: 0 } }}
 								>
 									{isDownloading ? (
 										<CircularProgress size={20} />
@@ -278,39 +303,11 @@ export default function TrackCard({
 										<FiDownload size={20} />
 									)}
 								</IconButton>
-								<IconButton
-									aria-label={
-										isCurrentlyPlaying ? "Пауза" : "Слушать"
-									}
-									onClick={onPlay}
-									sx={{
-										order: { xs: -1, sm: 1 },
-										bgcolor: isCurrentlyPlaying
-											? "secondary.main"
-											: "action.selected",
-										color: isCurrentlyPlaying
-											? "secondary.contrastText"
-											: "text.primary",
-										borderRadius: "50%",
-										"&:hover": {
-											bgcolor: isCurrentlyPlaying
-												? "secondary.dark"
-												: "action.hover",
-										},
-									}}
-								>
-									{isCurrentlyPlaying ? (
-										<FiPause size={20} />
-									) : (
-										<FiPlay size={20} />
-									)}
-								</IconButton>
 								{isAdmin && (
 									<IconButton
 										aria-label="Удалить трек"
 										color="error"
 										onClick={onDelete}
-										sx={{ order: 2 }}
 									>
 										<FiTrash2 size={20} />
 									</IconButton>
@@ -366,7 +363,7 @@ export default function TrackCard({
 										variant="body2"
 										color="text.secondary"
 									>
-										{lyricsAuthors}
+										Авторы текста: {lyricsAuthors}
 									</Typography>
 								)}
 							</Stack>

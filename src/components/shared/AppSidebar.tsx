@@ -172,7 +172,7 @@ export default function AppSidebar({
 					background: "url(/assets/multicam.webp)",
 					backgroundSize: "cover",
 					backgroundPosition: "center",
-					color: "#fff"
+					color: "#fff",
 				}}
 			>
 				<FiMusic size={20} />
