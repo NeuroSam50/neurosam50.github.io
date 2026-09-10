@@ -161,6 +161,7 @@ export default function AppSidebar({
 		<Box
 			sx={{
 				height: "100%",
+				bgcolor: "background.paper",
 				display: "flex",
 				flexDirection: "column",
 			}}
