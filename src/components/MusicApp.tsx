@@ -442,7 +442,7 @@ export default function MusicApp() {
 								/>
 								{isAdmin && (
 									<Button
-										href="/control"
+										href="/admin/control"
 										variant="outlined"
 										startIcon={<FiSettings />}
 									>
