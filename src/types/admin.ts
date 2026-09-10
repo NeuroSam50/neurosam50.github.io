@@ -20,3 +20,14 @@ export type AdminUserRow = {
 	avatar_url: string | null;
 	banned: boolean;
 };
+
+export type AdminCommentRow = {
+	id: string;
+	track_id: string;
+	user_id: string;
+	body: string;
+	created_at: string;
+	nickname: string;
+	avatar_url: string | null;
+	track_title: string;
+};

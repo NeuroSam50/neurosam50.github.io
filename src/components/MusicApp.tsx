@@ -50,6 +50,7 @@ import { useTrackVotes } from "../hooks/music/useTrackVotes";
 import { useActiveAlbum } from "../lib/albumStore";
 import { pluralize } from "../lib/plural";
 import TrackCard from "./music/TrackCard";
+import VirtualList from "./shared/VirtualList";
 import TrackPage from "./TrackPage";
 import {
 	playTrack as playStoreTrack,
@@ -62,6 +63,13 @@ function getTrackIdFromUrl() {
 		return "";
 	}
 	return new URLSearchParams(window.location.search).get("t") || "";
+}
+
+function getCommentIdFromUrl() {
+	if (typeof window === "undefined") {
+		return "";
+	}
+	return new URLSearchParams(window.location.search).get("c") || "";
 }
 
 type SortableTrackCardProps = {
@@ -108,6 +116,9 @@ function SortableTrackCard({
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
+			}}
+			sx={{
+				pb: 2,
 				opacity: isDragging ? 0.5 : 1,
 			}}
 		>
@@ -141,25 +152,37 @@ export default function MusicApp() {
 	const activeAlbum = useActiveAlbum();
 	const [query, setQuery] = useState("");
 	const [openTrackId, setOpenTrackId] = useState(getTrackIdFromUrl);
+	const [openCommentId, setOpenCommentId] = useState(getCommentIdFromUrl);
 
 	useEffect(() => {
-		const onPopState = () => setOpenTrackId(getTrackIdFromUrl());
+		const onPopState = () => {
+			setOpenTrackId(getTrackIdFromUrl());
+			setOpenCommentId(getCommentIdFromUrl());
+		};
 		window.addEventListener("popstate", onPopState);
 		return () => window.removeEventListener("popstate", onPopState);
 	}, []);
 
-	function openTrack(id: string) {
+	function openTrack(id: string, commentId = "") {
 		const url = new URL(window.location.href);
 		url.searchParams.set("t", id);
+		if (commentId) {
+			url.searchParams.set("c", commentId);
+		} else {
+			url.searchParams.delete("c");
+		}
 		window.history.pushState({}, "", url);
 		setOpenTrackId(id);
+		setOpenCommentId(commentId);
 	}
 
 	function closeTrack() {
 		const url = new URL(window.location.href);
 		url.searchParams.delete("t");
+		url.searchParams.delete("c");
 		window.history.pushState({}, "", url);
 		setOpenTrackId("");
+		setOpenCommentId("");
 	}
 	const { track: currentPlayerTrack, isPlaying: isPlayerPlaying } =
 		usePlayerState();
@@ -297,12 +320,8 @@ export default function MusicApp() {
 			);
 		}
 
-		const cards = visibleTracks.map((track) => (
-			<SortableTrackCard
-				key={track.id}
-				track={track}
-				dragEnabled={dragEnabled}
-			>
+		const renderTrackCard = (track: Track) => (
+			<SortableTrackCard track={track} dragEnabled={dragEnabled}>
 				{(dragHandle) => (
 					<TrackCard
 						track={track}
@@ -326,10 +345,20 @@ export default function MusicApp() {
 					/>
 				)}
 			</SortableTrackCard>
-		));
+		);
+
+		const list = (
+			<VirtualList
+				items={visibleTracks}
+				getKey={(track) => track.id}
+				estimateSize={104}
+				windowScroll
+				renderItem={renderTrackCard}
+			/>
+		);
 
 		if (!dragEnabled) {
-			return cards;
+			return list;
 		}
 
 		return (
@@ -343,14 +372,20 @@ export default function MusicApp() {
 					items={visibleTracks.map((track) => track.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					{cards}
+					{list}
 				</SortableContext>
 			</DndContext>
 		);
 	}
 
 	if (openTrackId) {
-		return <TrackPage trackId={openTrackId} onBack={closeTrack} />;
+		return (
+			<TrackPage
+				trackId={openTrackId}
+				onBack={closeTrack}
+				highlightCommentId={openCommentId}
+			/>
+		);
 	}
 
 	return (

@@ -197,9 +197,10 @@ export default function TrackCard({
 								spacing={1}
 								sx={{
 									justifyContent: {
-										xs: "flex-end",
+										xs: "space-between",
 										sm: "flex-start",
 									},
+									alignItems: "center",
 									width: { xs: "100%", sm: "auto" },
 								}}
 							>
@@ -269,6 +270,7 @@ export default function TrackCard({
 									aria-label="Скачать трек"
 									onClick={handleDownload}
 									disabled={isDownloading}
+									sx={{ order: { xs: 0, sm: 0 } }}
 								>
 									{isDownloading ? (
 										<CircularProgress size={20} />
@@ -282,6 +284,7 @@ export default function TrackCard({
 									}
 									onClick={onPlay}
 									sx={{
+										order: { xs: -1, sm: 1 },
 										bgcolor: isCurrentlyPlaying
 											? "secondary.main"
 											: "action.selected",
@@ -307,6 +310,7 @@ export default function TrackCard({
 										aria-label="Удалить трек"
 										color="error"
 										onClick={onDelete}
+										sx={{ order: 2 }}
 									>
 										<FiTrash2 size={20} />
 									</IconButton>

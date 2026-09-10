@@ -35,9 +35,14 @@ import {
 type Props = {
 	trackId: string;
 	onBack: () => void;
+	highlightCommentId?: string;
 };
 
-export default function TrackPage({ trackId, onBack }: Props) {
+export default function TrackPage({
+	trackId,
+	onBack,
+	highlightCommentId,
+}: Props) {
 	const { effectiveMode } = useColorMode();
 	const theme = useMemo(() => createAppTheme(effectiveMode), [effectiveMode]);
 	const emotionCache = useMemo(() => createEmotionCache(), []);
@@ -201,6 +206,7 @@ export default function TrackPage({ trackId, onBack }: Props) {
 								comments.togglePinComment(track.id, commentId)
 							}
 							onRequireAuth={requireAuth}
+							highlightCommentId={highlightCommentId}
 						/>
 					</CardContent>
 				</Card>

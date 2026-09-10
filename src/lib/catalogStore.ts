@@ -331,6 +331,13 @@ export async function reorderAlbums(
 		return false;
 	}
 
+	const order = new Map(updates.map(({ id, position }) => [id, position]));
+	patch({
+		albumRecords: [...state.albumRecords].sort(
+			(a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+		),
+	});
+
 	const client = supabase;
 	const results = await Promise.all(
 		updates.map(({ id, position }) =>
@@ -351,12 +358,6 @@ export async function reorderAlbums(
 		return false;
 	}
 
-	const order = new Map(updates.map(({ id, position }) => [id, position]));
-	patch({
-		albumRecords: [...state.albumRecords].sort(
-			(a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
-		),
-	});
 	return true;
 }
 

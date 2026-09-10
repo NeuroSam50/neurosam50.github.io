@@ -5,7 +5,6 @@ import {
 	Card,
 	CardContent,
 	IconButton,
-	List,
 	Stack,
 	TextField,
 	Typography,
@@ -13,6 +12,7 @@ import {
 import Avatar from "@mui/material/Avatar";
 import { FiEdit2, FiMusic, FiSearch, FiTrash2 } from "react-icons/fi";
 import type { AdminTrackRow } from "../../types/admin";
+import VirtualList from "../shared/VirtualList";
 
 type Props = {
 	trackRecords: AdminTrackRow[];
@@ -76,10 +76,12 @@ export default function TrackRecordsCard({
 							Ничего не найдено
 						</Typography>
 					) : (
-						<List disablePadding>
-							{filteredTracks.map((track) => (
+						<VirtualList
+							items={filteredTracks}
+							getKey={(track) => track.id}
+							estimateSize={64}
+							renderItem={(track) => (
 								<Stack
-									key={track.id}
 									direction="row"
 									spacing={1.5}
 									sx={{
@@ -87,7 +89,6 @@ export default function TrackRecordsCard({
 										py: 0.75,
 										borderBottom: "1px solid",
 										borderColor: "divider",
-										"&:last-of-type": { borderBottom: 0 },
 									}}
 								>
 									<Avatar
@@ -148,8 +149,8 @@ export default function TrackRecordsCard({
 										<FiTrash2 size={20} />
 									</IconButton>
 								</Stack>
-							))}
-						</List>
+							)}
+						/>
 					)}
 				</Stack>
 			</CardContent>

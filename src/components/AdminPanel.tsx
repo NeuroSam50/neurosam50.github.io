@@ -13,7 +13,9 @@ import { createAppTheme, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
 import { useAuthState } from "../lib/authStore";
 import { useUserRecords } from "../hooks/admin/useUserRecords";
+import { useAdminComments } from "../hooks/admin/useAdminComments";
 import UserRecordsCard from "./admin/UserRecordsCard";
+import CommentRecordsCard from "./admin/CommentRecordsCard";
 
 export default function AdminPanel() {
 	const { effectiveMode } = useColorMode();
@@ -25,13 +27,24 @@ export default function AdminPanel() {
 
 	const [tab, setTab] = useState(0);
 	const { userRecords, loadUsers, setUserBanned } = useUserRecords();
+	const {
+		commentRecords,
+		loadComments,
+		deleteComment,
+		deleteAllCommentsByUser,
+	} = useAdminComments();
 
 	useEffect(() => {
 		if (!isAdmin) {
 			return;
 		}
 		loadUsers();
+		loadComments();
 	}, [isAdmin]);
+
+	async function handleDeleteAllComments(userId: string) {
+		await deleteAllCommentsByUser(userId);
+	}
 
 	return (
 		<CacheProvider value={emotionCache}>
@@ -67,6 +80,7 @@ export default function AdminPanel() {
 									sx={{ mb: 2 }}
 								>
 									<Tab label="Пользователи" />
+									<Tab label="Сообщения" />
 								</Tabs>
 								{tab === 0 && (
 									<UserRecordsCard
@@ -75,6 +89,15 @@ export default function AdminPanel() {
 												user.user_id !== authUserId,
 										)}
 										onSetUserBanned={setUserBanned}
+										onDeleteAllComments={
+											handleDeleteAllComments
+										}
+									/>
+								)}
+								{tab === 1 && (
+									<CommentRecordsCard
+										commentRecords={commentRecords}
+										onDeleteComment={deleteComment}
 									/>
 								)}
 							</>

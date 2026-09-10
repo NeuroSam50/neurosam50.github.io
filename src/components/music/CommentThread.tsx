@@ -9,7 +9,7 @@ import {
 	Typography,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	FiCheck,
 	FiEdit2,
@@ -52,6 +52,7 @@ type Props = {
 	onDelete: (commentId: string) => void;
 	onTogglePin: (commentId: string) => void;
 	onRequireAuth: () => void;
+	highlightCommentId?: string;
 };
 
 export default function CommentThread({
@@ -71,9 +72,21 @@ export default function CommentThread({
 	onDelete,
 	onTogglePin,
 	onRequireAuth,
+	highlightCommentId,
 }: Props) {
 	const [editingId, setEditingId] = useState("");
 	const [editDraft, setEditDraft] = useState("");
+	const highlightRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		if (!highlightCommentId || loading) {
+			return;
+		}
+		highlightRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		});
+	}, [highlightCommentId, loading, comments]);
 
 	function startEditing(commentId: string, body: string) {
 		setEditingId(commentId);
@@ -109,7 +122,26 @@ export default function CommentThread({
 						</Typography>
 					)}
 					{comments.map((comment) => (
-						<Stack key={comment.id} direction="row" spacing={1.5}>
+						<Stack
+							key={comment.id}
+							ref={
+								comment.id === highlightCommentId
+									? highlightRef
+									: undefined
+							}
+							direction="row"
+							spacing={1.5}
+							sx={
+								comment.id === highlightCommentId
+									? {
+											bgcolor: "action.selected",
+											borderRadius: 1,
+											p: 0.5,
+											m: -0.5,
+										}
+									: undefined
+							}
+						>
 							<Avatar
 								src={comment.avatarUrl || undefined}
 								sx={{ width: 32, height: 32, flexShrink: 0 }}
