@@ -161,12 +161,20 @@ export default function AppSidebar({
 		<Box
 			sx={{
 				height: "100%",
-				bgcolor: "background.paper",
 				display: "flex",
 				flexDirection: "column",
 			}}
 		>
-			<Toolbar sx={{ gap: 1.5, px: 2.5 }}>
+			<Toolbar
+				sx={{
+					gap: 1.5,
+					px: 2.5,
+					background: "url(/assets/multicam.webp)",
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+					color: "#fff"
+				}}
+			>
 				<FiMusic size={20} />
 				<Box
 					component="a"
@@ -180,13 +188,17 @@ export default function AppSidebar({
 				>
 					<Typography
 						variant="subtitle1"
-						sx={{ fontWeight: 800, lineHeight: 1.1 }}
+						sx={{ fontWeight: 800, lineHeight: 1.1, color: "#fff" }}
 					>
 						НейроСэм
 					</Typography>
 				</Box>
 				{onClose && (
-					<IconButton aria-label="Закрыть меню" onClick={onClose}>
+					<IconButton
+						aria-label="Закрыть меню"
+						onClick={onClose}
+						sx={{ color: "#fff" }}
+					>
 						<FiX size={20} />
 					</IconButton>
 				)}
