@@ -26,6 +26,9 @@ export default function AdminPanel() {
 	const isAdmin = Boolean(authUserId) && isAdminUser;
 
 	const [tab, setTab] = useState(0);
+	const [messagesFilterUserId, setMessagesFilterUserId] = useState<
+		string | null
+	>(null);
 	const { userRecords, loadUsers, setUserBanned } = useUserRecords();
 	const {
 		commentRecords,
@@ -44,6 +47,11 @@ export default function AdminPanel() {
 
 	async function handleDeleteAllComments(userId: string) {
 		await deleteAllCommentsByUser(userId);
+	}
+
+	function handleViewMessages(userId: string) {
+		setMessagesFilterUserId(userId);
+		setTab(1);
 	}
 
 	return (
@@ -92,12 +100,17 @@ export default function AdminPanel() {
 										onDeleteAllComments={
 											handleDeleteAllComments
 										}
+										onViewMessages={handleViewMessages}
 									/>
 								)}
 								{tab === 1 && (
 									<CommentRecordsCard
 										commentRecords={commentRecords}
 										onDeleteComment={deleteComment}
+										filterUserId={messagesFilterUserId}
+										onClearFilter={() =>
+											setMessagesFilterUserId(null)
+										}
 									/>
 								)}
 							</>

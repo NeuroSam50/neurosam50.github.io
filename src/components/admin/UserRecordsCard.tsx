@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import {
+	FiEye,
 	FiMessageSquare,
 	FiMoreVertical,
 	FiSearch,
@@ -28,15 +29,22 @@ type Props = {
 	userRecords: AdminUserRow[];
 	onSetUserBanned: (userId: string, banned: boolean) => void;
 	onDeleteAllComments: (userId: string) => void;
+	onViewMessages: (userId: string) => void;
 };
 
 type UserRowProps = {
 	user: AdminUserRow;
 	onSetUserBanned: (userId: string, banned: boolean) => void;
 	onDeleteAllComments: (userId: string) => void;
+	onViewMessages: (userId: string) => void;
 };
 
-function UserRow({ user, onSetUserBanned, onDeleteAllComments }: UserRowProps) {
+function UserRow({
+	user,
+	onSetUserBanned,
+	onDeleteAllComments,
+	onViewMessages,
+}: UserRowProps) {
 	const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 	const closeMenu = () => setMenuAnchor(null);
 
@@ -92,6 +100,17 @@ function UserRow({ user, onSetUserBanned, onDeleteAllComments }: UserRowProps) {
 				<MenuItem
 					onClick={() => {
 						closeMenu();
+						onViewMessages(user.user_id);
+					}}
+				>
+					<ListItemIcon>
+						<FiEye size={18} />
+					</ListItemIcon>
+					<ListItemText>Просмотреть сообщения</ListItemText>
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						closeMenu();
 						onDeleteAllComments(user.user_id);
 					}}
 				>
@@ -126,6 +145,7 @@ export default function UserRecordsCard({
 	userRecords,
 	onSetUserBanned,
 	onDeleteAllComments,
+	onViewMessages,
 }: Props) {
 	const [search, setSearch] = useState("");
 
@@ -183,6 +203,7 @@ export default function UserRecordsCard({
 									user={user}
 									onSetUserBanned={onSetUserBanned}
 									onDeleteAllComments={onDeleteAllComments}
+									onViewMessages={onViewMessages}
 								/>
 							)}
 						/>

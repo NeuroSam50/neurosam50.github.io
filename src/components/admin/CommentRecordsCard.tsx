@@ -3,46 +3,76 @@ import {
 	Box,
 	Card,
 	CardContent,
+	Chip,
 	IconButton,
 	Stack,
 	TextField,
 	Typography,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
-import { FiExternalLink, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiExternalLink, FiSearch, FiTrash2, FiX } from "react-icons/fi";
 import type { AdminCommentRow } from "../../types/admin";
 import VirtualList from "../shared/VirtualList";
 
 type Props = {
 	commentRecords: AdminCommentRow[];
 	onDeleteComment: (commentId: string) => void;
+	filterUserId?: string | null;
+	onClearFilter?: () => void;
 };
 
 export default function CommentRecordsCard({
 	commentRecords,
 	onDeleteComment,
+	filterUserId,
+	onClearFilter,
 }: Props) {
 	const [search, setSearch] = useState("");
+
+	const userFilteredComments = useMemo(() => {
+		if (!filterUserId) {
+			return commentRecords;
+		}
+		return commentRecords.filter(
+			(comment) => comment.user_id === filterUserId,
+		);
+	}, [commentRecords, filterUserId]);
 
 	const filteredComments = useMemo(() => {
 		const query = search.trim().toLowerCase();
 		if (!query) {
-			return commentRecords;
+			return userFilteredComments;
 		}
-		return commentRecords.filter((comment) =>
+		return userFilteredComments.filter((comment) =>
 			`${comment.nickname} ${comment.body} ${comment.track_title}`
 				.toLowerCase()
 				.includes(query),
 		);
-	}, [commentRecords, search]);
+	}, [userFilteredComments, search]);
 
 	return (
 		<Card>
 			<CardContent>
 				<Stack spacing={1.5}>
 					<Typography variant="h6" sx={{ fontWeight: 800 }}>
-						Все сообщения ({commentRecords.length})
+						{filterUserId
+							? `Сообщения пользователя (${filteredComments.length})`
+							: `Все сообщения (${commentRecords.length})`}
 					</Typography>
+					{filterUserId && (
+						<Box>
+							<Chip
+								label={
+									userFilteredComments[0]?.nickname ||
+									"Пользователь"
+								}
+								onDelete={onClearFilter}
+								deleteIcon={<FiX size={16} />}
+								color="primary"
+								variant="outlined"
+							/>
+						</Box>
+					)}
 					<TextField
 						size="small"
 						fullWidth
