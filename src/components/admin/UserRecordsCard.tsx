@@ -47,6 +47,7 @@ function UserRow({
 }: UserRowProps) {
 	const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 	const closeMenu = () => setMenuAnchor(null);
+	const nickname = user.nickname || "Без ника";
 
 	return (
 		<Stack
@@ -67,11 +68,11 @@ function UserRow({
 					flexShrink: 0,
 				}}
 			>
-				{user.nickname.charAt(0).toUpperCase()}
+				{nickname.charAt(0).toUpperCase()}
 			</Avatar>
 			<Box sx={{ minWidth: 0, flex: 1 }}>
 				<Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
-					{user.nickname}
+					{nickname}
 				</Typography>
 				<Typography variant="caption" color="text.secondary" noWrap>
 					{user.email || "Почта неизвестна"}
@@ -86,7 +87,7 @@ function UserRow({
 				/>
 			)}
 			<IconButton
-				aria-label={`Действия с пользователем «${user.nickname}»`}
+				aria-label={`Действия с пользователем «${nickname}»`}
 				onClick={(event) => setMenuAnchor(event.currentTarget)}
 				sx={{ flexShrink: 0 }}
 			>
@@ -155,7 +156,7 @@ export default function UserRecordsCard({
 			return userRecords;
 		}
 		return userRecords.filter((user) =>
-			`${user.nickname} ${user.email || ""}`
+			`${user.nickname || ""} ${user.email || ""}`
 				.toLowerCase()
 				.includes(query),
 		);
