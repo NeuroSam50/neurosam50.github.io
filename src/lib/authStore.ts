@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "./supabase";
 import { generateRandomNickname } from "./nickname";
+import { notify } from "./uiStore";
 
 type Updater<T> = T | ((current: T) => T);
 
@@ -28,6 +29,8 @@ let state: AuthState = {
 
 const listeners = new Set<() => void>();
 let initialized = false;
+let banChannel: ReturnType<NonNullable<typeof supabase>["channel"]> | null =
+	null;
 
 function resolveUpdater<T>(updater: Updater<T>, current: T): T {
 	return typeof updater === "function"
@@ -58,31 +61,81 @@ export function setMyCommentVotes(
 	patch({ myCommentVotes: resolveUpdater(value, state.myCommentVotes) });
 }
 
+function stopWatchingBan() {
+	if (banChannel) {
+		supabase?.removeChannel(banChannel);
+		banChannel = null;
+	}
+}
+
+async function signOutForBan() {
+	stopWatchingBan();
+	if (!supabase) {
+		return;
+	}
+	await supabase.auth.signOut();
+	notify("Ваш аккаунт заблокирован.", "error");
+}
+
+function watchBanStatus(userId: string) {
+	if (!supabase || banChannel) {
+		return;
+	}
+
+	banChannel = supabase
+		.channel(`profile-ban:${userId}`)
+		.on(
+			"postgres_changes",
+			{
+				event: "UPDATE",
+				schema: "public",
+				table: "profiles",
+				filter: `user_id=eq.${userId}`,
+			},
+			(payload) => {
+				if ((payload.new as { banned?: boolean })?.banned) {
+					signOutForBan();
+				}
+			},
+		)
+		.subscribe();
+}
+
 async function loadProfile(userId: string) {
 	if (!supabase) {
 		return;
 	}
 
-	const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
-		supabase
-			.from("admin_profiles")
-			.select("user_id")
-			.eq("user_id", userId)
-			.maybeSingle(),
-		supabase
-			.from("profiles")
-			.select("avatar_url,nickname")
-			.eq("user_id", userId)
-			.maybeSingle(),
-	]);
+	const [{ data: adminRow }, { data: profileRow }, { data: userData }] =
+		await Promise.all([
+			supabase
+				.from("admin_profiles")
+				.select("user_id")
+				.eq("user_id", userId)
+				.maybeSingle(),
+			supabase
+				.from("profiles")
+				.select("avatar_url,nickname,email,banned")
+				.eq("user_id", userId)
+				.maybeSingle(),
+			supabase.auth.getUser(),
+		]);
 
+	if (profileRow?.banned) {
+		await signOutForBan();
+		return;
+	}
+
+	watchBanStatus(userId);
+
+	const email = userData.user?.email || "";
 	let nickname = profileRow?.nickname || "";
-	if (!nickname) {
-		const generated = generateRandomNickname();
+	if (!nickname || profileRow?.email !== email) {
+		const generated = nickname || generateRandomNickname();
 		const { error } = await supabase
 			.from("profiles")
 			.upsert(
-				{ user_id: userId, nickname: generated },
+				{ user_id: userId, nickname: generated, email },
 				{ onConflict: "user_id" },
 			);
 
@@ -111,6 +164,7 @@ async function loadProfile(userId: string) {
 }
 
 function clearAuthState() {
+	stopWatchingBan();
 	patch({
 		authEmail: "",
 		authUserId: "",

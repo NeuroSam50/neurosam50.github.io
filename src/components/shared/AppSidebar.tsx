@@ -20,6 +20,7 @@ import {
 	FiMenu,
 	FiMoreVertical,
 	FiMusic,
+	FiShield,
 	FiTrash2,
 	FiX,
 } from "react-icons/fi";
@@ -324,6 +325,23 @@ export default function AppSidebar({
 					</Button>
 				)}
 			</Box>
+			{isAdmin && (
+				<>
+					<Divider />
+					<Box sx={{ p: 1 }}>
+						<Button
+							component="a"
+							href="/admin/panel"
+							onClick={onClose}
+							variant="outlined"
+							startIcon={<FiShield size={20} />}
+							fullWidth
+						>
+							Админ-панель
+						</Button>
+					</Box>
+				</>
+			)}
 			<Menu
 				anchorEl={menuAnchor}
 				open={Boolean(menuAnchor)}

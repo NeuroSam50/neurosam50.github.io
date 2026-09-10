@@ -12,3 +12,11 @@ export type AdminTrackRow = {
 	cover_path: string | null;
 	lyrics: string;
 };
+
+export type AdminUserRow = {
+	user_id: string;
+	nickname: string;
+	email: string | null;
+	avatar_url: string | null;
+	banned: boolean;
+};
