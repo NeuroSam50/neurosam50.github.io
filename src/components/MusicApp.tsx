@@ -167,7 +167,6 @@ export default function MusicApp() {
 
 	const { toggleTrackLike } = useTrackVotes({
 		authUserId,
-		requireAuth,
 		myVotes,
 		setMyVotes,
 		setTrackRecords,

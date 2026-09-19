@@ -109,12 +109,16 @@ export async function handleAuthSubmit() {
 			});
 
 			if (error) {
-				patch({ authError: "Не удалось отправить письмо. Проверьте адрес почты." });
+				patch({
+					authError:
+						"Не удалось отправить письмо. Проверьте адрес почты.",
+				});
 				return;
 			}
 
 			patch({
-				authNotice: "Письмо со ссылкой для смены пароля отправлено на почту.",
+				authNotice:
+					"Письмо со ссылкой для смены пароля отправлено на почту.",
 				authMode: "login",
 			});
 			return;

@@ -59,7 +59,6 @@ export default function TrackPage({
 
 	const { toggleTrackLike } = useTrackVotes({
 		authUserId,
-		requireAuth,
 		myVotes,
 		setMyVotes,
 		setTrackRecords,

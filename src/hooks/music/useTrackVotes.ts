@@ -6,7 +6,6 @@ import type { Track } from "../../types/music";
 
 type Params = {
 	authUserId: string;
-	requireAuth: () => boolean;
 	myVotes: Record<string, boolean>;
 	setMyVotes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 	setTrackRecords: React.Dispatch<React.SetStateAction<Track[]>>;
@@ -14,7 +13,6 @@ type Params = {
 
 export function useTrackVotes({
 	authUserId,
-	requireAuth,
 	myVotes,
 	setMyVotes,
 	setTrackRecords,
@@ -22,13 +20,52 @@ export function useTrackVotes({
 	const pending = useRef(new Set<string>());
 
 	async function toggleTrackLike(trackId: string) {
-		if (!supabase || !requireAuth() || pending.current.has(trackId)) {
+		if (!supabase || pending.current.has(trackId)) {
 			return;
 		}
 
 		pending.current.add(trackId);
 
 		try {
+			if (!authUserId) {
+				const { data: liked, error } = await supabase.rpc(
+					"toggle_track_like_anon",
+					{ p_track_id: trackId },
+				);
+
+				if (error) {
+					notify(
+						describeError(error, "Не удалось поставить лайк."),
+						"error",
+					);
+					return;
+				}
+
+				setMyVotes((current) => {
+					const next = { ...current };
+					if (liked) {
+						next[trackId] = true;
+					} else {
+						delete next[trackId];
+					}
+					return next;
+				});
+				setTrackRecords((current) =>
+					current.map((track) =>
+						track.id === trackId
+							? {
+									...track,
+									up: Math.max(
+										0,
+										track.up + (liked ? 1 : -1),
+									),
+								}
+							: track,
+					),
+				);
+				return;
+			}
+
 			const isLiked = Boolean(myVotes[trackId]);
 
 			if (isLiked) {

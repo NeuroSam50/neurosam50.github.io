@@ -10,13 +10,7 @@ import {
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import { CacheProvider } from "@emotion/react";
-import {
-	FiMusic,
-	FiPause,
-	FiPlay,
-	FiVolume2,
-	FiVolumeX,
-} from "react-icons/fi";
+import { FiMusic, FiPause, FiPlay, FiVolume2, FiVolumeX } from "react-icons/fi";
 import { createAppTheme, drawerWidth, useColorMode } from "../lib/theme";
 import { createEmotionCache } from "../lib/emotionCache";
 import {
@@ -155,17 +149,26 @@ export default function GlobalPlayer() {
 					<Stack
 						direction={{ xs: "column", sm: "row" }}
 						spacing={{ xs: 1, sm: 1.25 }}
-						sx={{ alignItems: { xs: "stretch", sm: "center" }, opacity: track ? 1 : 0.5 }}
+						sx={{
+							alignItems: { xs: "stretch", sm: "center" },
+							opacity: track ? 1 : 0.5,
+						}}
 					>
 						<Stack
 							direction="row"
 							spacing={{ xs: 0.75, sm: 1.25 }}
-							sx={{ alignItems: "center", minWidth: 0, flexShrink: 0 }}
+							sx={{
+								alignItems: "center",
+								minWidth: 0,
+								flexShrink: 0,
+							}}
 						>
 							<IconButton
 								onClick={togglePlay}
 								disabled={!track}
-								aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
+								aria-label={
+									isPlaying ? "Пауза" : "Воспроизвести"
+								}
 								sx={{
 									position: "relative",
 									width: 40,
@@ -174,7 +177,9 @@ export default function GlobalPlayer() {
 									borderRadius: 0.5,
 									padding: 0,
 									overflow: "hidden",
-									"&:hover .cover-play-overlay": { opacity: 1 },
+									"&:hover .cover-play-overlay": {
+										opacity: 1,
+									},
 								}}
 							>
 								<Avatar
@@ -301,7 +306,11 @@ export default function GlobalPlayer() {
 
 							<Typography
 								variant="caption"
-								sx={{ opacity: 0.65, minWidth: 34, flexShrink: 0 }}
+								sx={{
+									opacity: 0.65,
+									minWidth: 34,
+									flexShrink: 0,
+								}}
 							>
 								{formatTime(duration)}
 							</Typography>
@@ -347,7 +356,6 @@ export default function GlobalPlayer() {
 								sx={{ color: "text.primary" }}
 							/>
 						</Stack>
-
 					</Stack>
 				</Box>
 			</ThemeProvider>

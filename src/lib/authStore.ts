@@ -163,6 +163,24 @@ async function loadProfile(userId: string) {
 	});
 }
 
+async function loadAnonVotes() {
+	if (!supabase) {
+		return;
+	}
+
+	const { data: voteRows } = await supabase.rpc("get_my_track_votes_anon");
+
+	patch({
+		myVotes: (voteRows || []).reduce<Record<string, boolean>>(
+			(acc, row: { track_id: string }) => {
+				acc[row.track_id] = true;
+				return acc;
+			},
+			{},
+		),
+	});
+}
+
 function clearAuthState() {
 	stopWatchingBan();
 	patch({
@@ -174,6 +192,7 @@ function clearAuthState() {
 		myVotes: {},
 		myCommentVotes: {},
 	});
+	loadAnonVotes();
 }
 
 function ensureInitialized() {
@@ -192,6 +211,8 @@ function ensureInitialized() {
 		if (user) {
 			patch({ authEmail: user.email || "", authUserId: user.id });
 			loadProfile(user.id);
+		} else {
+			loadAnonVotes();
 		}
 		patch({ authLoading: false });
 	});

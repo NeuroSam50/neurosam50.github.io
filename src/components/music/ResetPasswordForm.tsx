@@ -153,9 +153,7 @@ export default function ResetPasswordForm() {
 								type="submit"
 								variant="contained"
 								disabled={
-									submitting ||
-									!password ||
-									!confirmPassword
+									submitting || !password || !confirmPassword
 								}
 								startIcon={
 									submitting ? (
