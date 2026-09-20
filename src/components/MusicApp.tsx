@@ -8,6 +8,9 @@ import {
 	CardContent,
 	CircularProgress,
 	InputAdornment,
+	MenuItem,
+	Select,
+	type SelectChangeEvent,
 	Stack,
 	TextField,
 	ThemeProvider,
@@ -140,6 +143,9 @@ export default function MusicApp() {
 
 	const activeAlbum = useActiveAlbum();
 	const [query, setQuery] = useState("");
+	const [sortMode, setSortMode] = useState<
+		"date-desc" | "date-asc" | "alphabetical"
+	>("date-desc");
 	const [openTrackId, setOpenTrackId] = useState(getTrackIdFromUrl);
 
 	useEffect(() => {
@@ -186,10 +192,19 @@ export default function MusicApp() {
 					`${track.title} ${track.artist} ${track.mood}`.toLowerCase();
 				return matchesAlbum && haystack.includes(needle);
 			})
-			.sort((a, b) => b[positionField] - a[positionField]);
-	}, [activeAlbum, positionField, query, trackRecords]);
+			.sort((a, b) => {
+				if (sortMode === "alphabetical") {
+					return a.title.localeCompare(b.title, "ru");
+				}
+				if (sortMode === "date-asc") {
+					return a[positionField] - b[positionField];
+				}
+				return b[positionField] - a[positionField];
+			});
+	}, [activeAlbum, positionField, query, sortMode, trackRecords]);
 
-	const dragEnabled = isAdmin && query.trim() === "";
+	const dragEnabled =
+		isAdmin && query.trim() === "" && sortMode === "date-desc";
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -404,6 +419,28 @@ export default function MusicApp() {
 										},
 									}}
 								/>
+								<Select
+									value={sortMode}
+									onChange={(event: SelectChangeEvent) =>
+										setSortMode(
+											event.target
+												.value as typeof sortMode,
+										)
+									}
+									size="small"
+									aria-label="Сортировка треков"
+									sx={{ width: { xs: "100%", sm: 240 } }}
+								>
+									<MenuItem value="date-desc">
+										Сначала новые
+									</MenuItem>
+									<MenuItem value="date-asc">
+										Сначала старые
+									</MenuItem>
+									<MenuItem value="alphabetical">
+										По алфавиту
+									</MenuItem>
+								</Select>
 								{isAdmin && (
 									<Button
 										href="/admin/control"
